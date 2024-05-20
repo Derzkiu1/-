@@ -70,6 +70,23 @@
                 console.error('Error:', error);
             });
         }
+        // Функция для загрузки данных из файла users.json
+        async function loadUserData() {
+            try {
+                const response = await fetch('users.json');
+                const userData = await response.json();
+                // Предполагаем, что файл содержит данные только для одного пользователя
+                const user = userData[0];
+                // Вставляем баланс и население на страницу
+                document.getElementById('balance').textContent = user.balance;
+                document.getElementById('population').textContent = user.population;
+            } catch (error) {
+                console.error('Ошибка загрузки данных:', error);
+            }
+        }
+
+        // Вызываем функцию загрузки данных при загрузке страницы
+        window.onload = loadUserData;
     </script>
 </body>
 </html>
