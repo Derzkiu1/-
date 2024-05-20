@@ -1,14 +1,44 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Top Players</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Top Players</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        body { background-color: black; color: white; font-family: Arial, sans-serif; text-align: center; margin: 0; padding: 0; }
+        .header { padding: 10px; background-color: #000; box-shadow: 0 0 10px rgba(0, 0, 0, 0.5); }
+        .top-players { margin: 20px; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { border: 1px solid rgba(255, 255, 255, 0.5); padding: 8px; text-align: left; }
+        th { background-color: #000; color: white; }
+        .back-button { position: absolute; left: 10px; }
+    </style>
 </head>
 <body>
-<h1>Топ Игроков</h1>
-<ol>
-<li>sanyasem: Баланс 100, Население 50</li>
-</ol>
+    <div class="header">
+        <button class="back-button" onclick="window.location.href = 'index.html'"><i class="fas fa-arrow-left"></i></button>
+        <h1>Top Players</h1>
+    </div>
+    <div class="top-players">
+        <table>
+            <tr>
+                <th>Место</th>
+                <th>Имя</th>
+                <th>Население</th>
+                <th>Лига</th>
+            </tr>
+            <!-- Python-код для загрузки данных из users.json и их отображения в таблице -->
+            {% set users = load_users() %}
+            {% for index, user in users[:10] %}
+                <tr>
+                    <td>{{ index + 1 }}</td>
+                    <td>{{ user["username"] }}</td>
+                    <td>{{ user["population"] }}</td>
+                    <td>{{ user["league"] }}</td>
+                </tr>
+            {% endfor %}
+        </table>
+    </div>
 </body>
 </html>
