@@ -17,26 +17,27 @@
         .control-panel button:hover img { opacity: 1; }
         .gif-container { margin: 50px 0; }
         .gif-container img { max-width: 80%; border: 5px solid white; border-radius: 10px; box-shadow: 0 0 20px rgba(255, 255, 255, 0.5); }
-        .league-container { margin: 2px 0; padding: 10px; background-color: #333; box-shadow: 0 0 20px rgba(0, 0, 0, 0.5); border-radius: 10px; display: inline-block; }
-        .league { font-size: 15px; padding: 3px; background-color: rgba(68, 68, 68, 0.7); border-radius: 5px; box-shadow: 0 0 10px rgba(255, 255, 255, 0.3); }
+        .league-container { margin: 2px 0; padding: 10px; background-color: #333; box-shadow: 0 0 20px rgba(0, 0, 0, 0.5); border-radius: 10px; display: inline-block; transition: background-color 0.3s; }
+        .league { font-size: 15px; padding: 3px; background-color: rgba(68, 68, 68, 0.7); border-radius: 5px; box-shadow: 0 0 10px rgba(255, 255, 255, 0.3); display: flex; align-items: center; }
+        .league i { margin-right: 5px; }
     </style>
 </head>
 <body>
     <div class="header">
         <h1>Districts</h1>
         <div class="balance">Баланс: <span id="balance">0</span></div>
-        <div class="population">Население: <span id="population">0</span></div> <!-- Элемент для отображения населения -->
-        <div class="league-container">
+        <div class="population">Население: <span id="population">0</span></div>
+        <div class="league-container" id="leagueContainer">
             <div id="league" class="league">Начинающий</div>
         </div>
     </div>
     <div class="gif-container">
-        <img src="https://i.pinimg.com/originals/ff/1d/88/ff1d8824966668a2eb271133549d5d79.gif" alt="Gif Image">
+        <img id="leagueGif" src="https://i.pinimg.com/originals/ff/1d/88/ff1d8824966668a2eb271133549d5d79.gif" alt="Gif Image">
     </div>
     <div class="control-panel">
-    <button onclick="window.location.href = 'shop.html'"><i class="fas fa-shopping-cart"></i></button>
-    <button onclick="window.location.href = 'top.html'"><i class="fas fa-star"></i></button>
-    <button onclick="window.location.href = 'boost.html'"><i class="fas fa-bolt"></i></button>
+        <button onclick="window.location.href = 'shop.html'"><i class="fas fa-shopping-cart"></i></button>
+        <button onclick="window.location.href = 'top.html'"><i class="fas fa-star"></i></button>
+        <button onclick="window.location.href = 'boost.html'"><i class="fas fa-bolt"></i></button>
     </div>
     <script>
         function savePlayerData(destination) {
@@ -49,7 +50,6 @@
                 league: league
             };
 
-            // Отправка данных на сервер
             fetch('/save_data', {
                 method: 'POST',
                 headers: {
@@ -60,7 +60,6 @@
             .then(response => {
                 if (response.ok) {
                     console.log('Player data saved successfully!');
-                    // Переход на целевую страницу после успешного сохранения данных
                     window.location.href = destination;
                 } else {
                     console.error('Failed to save player data');
@@ -70,22 +69,41 @@
                 console.error('Error:', error);
             });
         }
-        // Функция для загрузки данных из файла users.json
+
+        function updateLeagueAndGif(balance) {
+            const leagueElement = document.getElementById('league');
+            const gifElement = document.getElementById('leagueGif');
+            const leagueContainer = document.getElementById('leagueContainer');
+
+            if (balance < 100000) {
+                leagueElement.innerHTML = '<i class="fas fa-user"></i>Начинающий';
+                gifElement.src = 'https://i.pinimg.com/originals/ff/1d/88/ff1d8824966668a2eb271133549d5d79.gif';
+                leagueContainer.style.backgroundColor = '#823316';
+            } else if (balance < 500000) {
+                leagueElement.innerHTML = '<i class="fas fa-user-graduate"></i>Опытный';
+                gifElement.src = 'https://cdnb.artstation.com/p/assets/images/images/052/004/767/original/yurii-ray-06-gif-export-200.gif?1658731969';
+                leagueContainer.style.backgroundColor = '#940A36';
+            } else {
+                leagueElement.innerHTML = '<i class="fas fa-crown"></i>Правитель';
+                gifElement.src = 'https://i.pinimg.com/originals/80/31/12/803112952a7108f000906544d545256e.gif';
+                leagueContainer.style.backgroundColor = '#721373';
+
+            }
+        }
+
         async function loadUserData() {
             try {
                 const response = await fetch('users.json');
                 const userData = await response.json();
-                // Предполагаем, что файл содержит данные только для одного пользователя
                 const user = userData[0];
-                // Вставляем баланс и население на страницу
                 document.getElementById('balance').textContent = user.balance;
                 document.getElementById('population').textContent = user.population;
+                updateLeagueAndGif(user.balance);
             } catch (error) {
                 console.error('Ошибка загрузки данных:', error);
             }
         }
 
-        // Вызываем функцию загрузки данных при загрузке страницы
         window.onload = loadUserData;
     </script>
 </body>
