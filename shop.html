@@ -33,24 +33,7 @@
     </div>
 
     <script>
-        let users = [
-            {
-                "user_id": 708250672,
-                "username": "sanyasem",
-                "first_name": "Sancho",
-                "league": "Правитель",
-                "balance": 40000,
-                "population": 222,
-                "totalProfit": 0,
-                "items": [
-                    { "name": "Улучшение улиц", "price": 100, "priceIncrement": 30, "profit": 40, "profitIncrement": 0.25, "population": 10, "level": 0 },
-                    { "name": "Уборка улиц", "price": 180, "priceIncrement": 50, "profit": 55, "profitIncrement": 0.25, "population": 15, "level": 0 }
-                ]
-            },
-            // Дополнительные пользователи могут быть добавлены здесь
-        ];
-
-        let currentUser = users[0]; // Устанавливаем текущего пользователя
+        let currentUser;
 
         window.onload = function() {
             loadUserData();
@@ -59,17 +42,36 @@
         };
 
         function loadUserData() {
-            // Загрузить данные из Local Storage, если они есть
-            const storedData = localStorage.getItem('users');
-            if (storedData) {
-                users = JSON.parse(storedData);
-                currentUser = users[0]; // Устанавливаем текущего пользователя
-            }
+            // Загрузить данные пользователя из файла users.json
+            fetch('users.json')
+                .then(response => response.json())
+                .then(data => {
+                    currentUser = data[0]; // Устанавливаем текущего пользователя
+                    updateBalanceDisplay();
+                    initializeShop();
+                })
+                .catch(error => console.error('Ошибка загрузки данных:', error));
         }
 
         function saveUserData() {
-            // Сохранить данные в Local Storage
-            localStorage.setItem('users', JSON.stringify(users));
+            // Сохранить данные пользователя в файл users.json
+            fetch('/save_data', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify([currentUser])
+            })
+            .then(response => {
+                if (response.ok) {
+                    console.log('Player data saved successfully!');
+                } else {
+                    console.error('Failed to save player data');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
         }
 
         function updateBalanceDisplay() {
