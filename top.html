@@ -6,13 +6,72 @@
     <title>Top Players</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <style>
-        body { background-color: black; color: white; font-family: Arial, sans-serif; text-align: center; margin: 0; padding: 0; }
-        .header { padding: 10px; background-color: #000; box-shadow: 0 0 10px rgba(0, 0, 0, 0.5); }
-        .top-players { margin: 20px; }
-        table { width: 100%; border-collapse: collapse; }
-        th, td { border: 1px solid rgba(255, 255, 255, 0.5); padding: 8px; text-align: left; }
-        th { background-color: #000; color: white; }
-        .back-button { position: absolute; left: 10px; }
+        body {
+            background-color: black;
+            color: white;
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+        }
+        .header {
+            padding: 10px;
+            background-color: #000;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+            position: relative;
+        }
+        .top-players {
+            margin: 20px;
+        }
+        table {
+            width: 60%; /* Уменьшаем ширину таблицы */
+            margin: 0 auto;
+            border-collapse: collapse;
+            font-size: 16px; /* Уменьшаем размер шрифта */
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        th, td {
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            padding: 10px 5px; /* Уменьшаем отступы */
+            text-align: center;
+        }
+        th {
+            background-color: #333;
+            color: white;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        tr:nth-child(even) {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        tr:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+        .back-button {
+            position: absolute;
+            left: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            background-color: #444;
+            border: none;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .back-button:hover {
+            background-color: #666;
+        }
+        .icon {
+            margin-right: 8px;
+        }
+        .fa-crown { color: gold; }
+        .fa-coins { color: yellow; }
+        .fa-users { color: lightgreen; }
+        .fa-trophy { color: silver; }
     </style>
 </head>
 <body>
@@ -21,24 +80,72 @@
         <h1>Top Players</h1>
     </div>
     <div class="top-players">
-        <table>
-            <tr>
-                <th>Место</th>
-                <th>Имя</th>
-                <th>Население</th>
-                <th>Лига</th>
-            </tr>
-            <!-- Python-код для загрузки данных из users.json и их отображения в таблице -->
-            {% set users = load_users() %}
-            {% for index, user in users[:10] %}
+        <table id="playersTable">
+            <thead>
                 <tr>
-                    <td>{{ index + 1 }}</td>
-                    <td>{{ user["username"] }}</td>
-                    <td>{{ user["population"] }}</td>
-                    <td>{{ user["league"] }}</td>
+                    <th><i class="fas fa-trophy icon"></i>Место</th>
+                    <th><i class="fas fa-user icon"></i>Имя</th>
+                    <th><i class="fas fa-coins icon"></i>Баланс</th>
+                    <th><i class="fas fa-users icon"></i>Население</th>
+                    <th><i class="fas fa-crown icon"></i>Лига</th>
                 </tr>
-            {% endfor %}
+            </thead>
+            <tbody>
+                <!-- Данные будут добавлены динамически с помощью JavaScript -->
+            </tbody>
         </table>
     </div>
+    <script>
+        // Функция для загрузки данных из файла users.json
+        async function loadUserData() {
+            try {
+                const response = await fetch('users.json');
+                if (!response.ok) {
+                    throw new Error('Network response was not ok ' + response.statusText);
+                }
+                const users = await response.json();
+
+                // Обновление лиги каждого пользователя
+                users.forEach(user => {
+                    if (user.balance < 100000) {
+                        user.league = 'Начинающий';
+                    } else if (user.balance < 500000) {
+                        user.league = 'Опытный';
+                    } else {
+                        user.league = 'Правитель';
+                    }
+                });
+
+                // Сортировка пользователей по балансу (по убыванию)
+                users.sort((a, b) => b.balance - a.balance);
+
+                // Получение топ-10 пользователей
+                const topUsers = users.slice(0, 10);
+
+                // Заполнение таблицы
+                const tableBody = document.querySelector('#playersTable tbody');
+                tableBody.innerHTML = ''; // Очистка таблицы перед заполнением
+                topUsers.forEach((user, index) => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${index + 1}</td>
+                        <td>${user.username}</td>
+                        <td>${user.balance}</td>
+                        <td>${user.population}</td>
+                        <td>${user.league}</td>
+                    `;
+                    tableBody.appendChild(row);
+                });
+
+                console.log("User data loaded and table populated successfully");
+            } catch (error) {
+                console.error('Ошибка загрузки данных:', error);
+            }
+        }
+
+        // Вызов функции загрузки данных при загрузке страницы
+        window.onload = loadUserData;
+    </script>
 </body>
 </html>
+<li>sanyasem: Баланс 0, Население 0</li>
