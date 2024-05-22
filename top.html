@@ -107,9 +107,9 @@
 
                 // Обновление лиги каждого пользователя
                 users.forEach(user => {
-                    if (user.balance < 100000) {
+                    if (user.balance < 10000) {
                         user.league = 'Начинающий';
-                    } else if (user.balance < 500000) {
+                    } else if (user.balance < 50000) {
                         user.league = 'Опытный';
                     } else {
                         user.league = 'Правитель';
@@ -129,7 +129,7 @@
                     const row = document.createElement('tr');
                     row.innerHTML = `
                         <td>${index + 1}</td>
-                        <td>${user.username}</td>
+                        <td>${user.first_name}</td>
                         <td>${user.balance}</td>
                         <td>${user.population}</td>
                         <td>${user.league}</td>
@@ -148,4 +148,12 @@
     </script>
 </body>
 </html>
+<li>sanyasem: Баланс 0, Население 0</li>
+<li>sanyasem: Баланс 100, Население 50</li>
+<li>sanyasem: Баланс 0, Население 0</li>
+<li>sanyasem: Баланс 100, Население 50</li>
+<li>sanyasem: Баланс 0, Население 0</li>
+<li>sanyasem: Баланс 0, Население 0</li>
+<li>sanyasem: Баланс 0, Население 0</li>
+<li>sanyasem: Баланс 0, Население 0</li>
 <li>sanyasem: Баланс 0, Население 0</li>
