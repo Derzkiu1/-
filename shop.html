@@ -107,119 +107,64 @@
     <button onclick="window.location.href='index.html'" style="position: absolute; left: 10px;"><i
         class="fas fa-arrow-left"></i></button>
     <h1>Shop</h1>
-    <p class="balance" id="balance">Balance: 0 Coins</p>
+    <p class="balance" id="balance">Loading...</p>
   </div>
   <div class="shop-container" id="shop-container">
     <!-- Items will be dynamically added here -->
   </div>
 
   <script>
-        const shopContainer = document.getElementById('shop-container');
-        const balanceDisplay = document.getElementById('balance');
+      const shopContainer = document.getElementById('shop-container');
+      const balanceDisplay = document.getElementById('balance');
 
-        let balance = 0;
-        let items = [];
+      let balance = 0;
+      let items = [];
 
-        // Файл JSON содержит массив объектов со следующими полями:
-        // - name (название товара)
-        // - image (URL-адрес изображения товара)
-        // - price (стоимость товара)
-        // - level (текущий уровень товара)
-
-        // Fetch the list of items from the JSON file
-        fetch('items.json')
-          .then(res => res.json())
-          .then(data => {
-            items = data;
-
-            // Add the items to the shop container
-            items.forEach(item => {
-              const itemElement = createItemElement(item);
-              shopContainer.appendChild(itemElement);
+      function checkItemsFileExists() {
+        return new Promise((resolve, reject) => {
+          fetch('items.json')
+            .then(res => res.json())
+            .then(data => {
+              resolve(true);
+            })
+            .catch(err => {
+              resolve(false);
             });
+        });
+      }
 
-            // Update the balance display
-            updateBalanceDisplay();
-          })
-          .catch(err => {
-            console.error('Error fetching items:', err);
-            alert('Error loading the shop. Please try again later.');
-          });
+      (async function() {
+        const itemsFileExists = await checkItemsFileExists();
 
-        // Create an item element
-        function createItemElement(item) {
-          const itemElement = document.createElement('div');
-          itemElement.classList.add('item');
-          itemElement.innerHTML = `
-            <img src="${item.image}" alt="${item.name}">
-            <h3 class="name">${item.name}</h3>
-            <p class="price">$${item.price}</p>
-            <div class="level-bar">
-              <div class="level-progress" style="width: ${item.level * 10}%"></div>
-            </div>
-            <p class="level-label">Level ${item.level}/10</p>
-            <button class="upgrade-button" onclick="upgradeItem('${item.name}')">Upgrade</button>
-          `;
+        if (!itemsFileExists) {
+          // Файл items.json не существует. Создадим его.
+          const items = [
+            {
+              name: "Уборка улиц",
+              image: "street-cleaning.png",
+              price: 100,
+              level: 1
+            },
+            {
+              name: "Ремонт дороги",
+              image: "road-repair.png",
+              price: 200,
+              level: 1
+            },
+            {
+              name: "Финансирование школ",
+              image: "school-funding.png",
+              price: 300,
+              level: 1
+            },
+            {
+              name: "Улучшение условий проживания",
+              image: "housing-improvement.png",
+              price: 400,
+              level: 1
+            }
+          ];
 
-          return itemElement;
-        }
-
-        // Upgrade an item
-        function upgradeItem(it
-    ogress" style="width: ${item.level * 10}%"></div>
-            </div>
-            <p class="level-label">Level ${item.level}/10</p>
-            <button class="upgrade-button" onclick="upgradeItem('${item.name}')">Upgrade</button>
-          ;
-
-          return itemElement;
-        }
-
-        // Upgrade an item
-        function upgradeItem(itemName) {
-          const item = items.find(item => item.name === itemName);
-
-          // Check if the player has enough money to upgrade the item
-          if (balance < item.price) {
-            alert('Not enough money to upgrade this item.');
-            return;
-          }
-
-          // Upgrade the item
-          item.level++;
-
-          // Update the item's level bar
-          const itemElement = shopContainer.querySelector(.item[data-name="${itemName}"]);
-          const levelBar = itemElement.querySelector('.level-bar');
-          levelBar.querySelector('.level-progress').style.width = ${item.level * 10}%;
-
-          // Update the item's level label
-          itemElement.querySelector('.level-label').textContent = Level ${item.level}/10;
-
-          // Update the balance
-          balance -= item.price;
-          updateBalanceDisplay();
-
-          // Save the upgraded item to the JSON file
-          saveItem(item);
-
-          // Check if the item has reached the maximum level
-          if (item.level === 10) {
-            // Disable the upgrade button
-            itemElement.querySelector('.upgrade-button').disabled = true;
-
-            // Add the 'max' class to the item
-            itemElement.classList.add('max');
-          }
-        }
-
-        // Update the balance display
-        function updateBalanceDisplay() {
-          balanceDisplay.textContent = Balance: $${balance};
-        }
-
-        // Save the upgraded item to the JSON file
-        function saveItem(item) {
           const data = JSON.stringify(items);
 
           fetch('items.json', {
@@ -231,14 +176,119 @@
           })
             .then(res => res.json())
             .then(data => {
-              console.log('Item saved successfully:', data);
+              console.log('Файл items.json создан успешно:', data);
             })
             .catch(err => {
-              console.error('Error saving item:', err);
-              alert('Error saving your progress. Please try again later.');
+              console.error('Ошибка создания файла items.json:', err);
+              alert('Ошибка создания данных товара. Пожалуйста, попробуйте еще раз позже.');
             });
         }
+      })();
+
+      // Fetch the list of items from the JSON file
+      fetch('items.json')
+        .then(res => res.json())
+        .then(data => {
+          items = data;
+
+          // Add the items to the shop container
+          items.forEach(item => {
+            const itemElement = createItemElement(item);
+            shopContainer.appendChild(itemElement);
+          });
+
+          // Update the balance display
+          updateBalanceDisplay();
+        })
+        .catch(err => {
+          console.error('Error fetching items:', err);
+          alert('Error loading the shop. Please try again later.');
+        });
+
+      // Create an item element
+      function createItemElement(item) {
+        const itemElement = document.createElement('div');
+        itemElement.classList.add('item');
+        itemElement.innerHTML =
+          <img src="${item.image}" alt="${item.name}">
+          <h3 class="name">${item.name}</h3>
+          <p class="price">$${item.price}</p>
+          <div class="level-bar">
+            <div class="level-progress" style="width: ${item.level * 10}%"></div>
+          </div>
+          <p class="level-label">Level ${item.level}/10</p>
+          <button class="upgrade-button" onclick="upgradeItem('${item.name}')">Upgrade</button>
+        ;
+
+        return itemElement;
+      }
+
+      // Upgrade an item
+      function upgradeItem(itemName) {
+        const item = items.find(item => item.name === itemName);
+
+        // Check if the player has enough money to upgrade the item
+        if (balance < item.price) {
+          alert('Not enough money to upgrade this item.');
+          return;
+        }
+
+        // Upgrade the item
+        item.level++;
+
+        // Update the item's level bar
+        const itemElement = shopContainer.querySelector(.item[data-name="${itemName}"]);
+        const levelBar = itemElement.querySelector('.level-bar');
+        levelBar.querySelector('.level-progress').style.width = ${item.level * 10}%;
+
+        // Update the item's level label
+        itemElement.querySelector('.level-label').textContent = Level ${item.level}/10;
+
+        // Update the balance
+        balance -= item.price;
+        updateBalanceDisplay();
+
+        // Save the upgraded item to the JSON file
+        saveItem(item);
+
+        // Check if the item has reached the maximum level
+        if (item.level === 10) {
+          // Disable the upgrade button
+          itemElement.querySelector('.upgrade-button').disabled = true;
+
+          // Add the 'max' class to the item
+          itemElement.classList.add('max');
+        }
+      }
+
+      // Update the balance display
+      function updateBalanceDisplay() {
+        balanceDisplay.textContent = Balance: $${balance};
+      }
+
+      // Save the upgraded item to the JSON file
+      function saveItem(item) {
+        const data = JSON.stringify(items);
+
+        fetch('items.json', {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: data
+        })
+          .then(res => res.json())
+          .then(data => {
+            console.log('Item saved successfully:', data);
+          })
+          .catch(err => {
+            console.error('Error saving item:', err);
+            alert('Error saving your progress. Please try again later.');
+          });
+      }
+
   </script>
 </body>
 
 </html>
+
