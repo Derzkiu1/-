@@ -1,131 +1,244 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Shop</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-    <style>
-        body { background-color: black; color: white; font-family: Arial, sans-serif; text-align: center; margin: 0; padding: 0; }
-        .header { padding: 10px; background-color: #000; box-shadow: 0 0 10px rgba(0, 0, 0, 0.5); }
-        .shop-container { margin-top: 20px; display: flex; flex-wrap: wrap; justify-content: center; }
-        .item { margin: 20px; position: relative; border: 2px solid #fff; border-radius: 10px; padding: 10px; width: calc(40% - 40px); max-width: 200px; }
-        .item img { width: 100%; height: auto; transition: transform 0.5s, filter 0.5s; }
-        .item img:hover { transform: rotateY(180deg); filter: grayscale(100%); }
-        .item .price { color: gold; font-weight: bold; }
-        .level-bar { width: 100%; background-color: #444; border-radius: 5px; }
-        .level-progress { height: 10px; background-color: gold; border-radius: 5px; }
-        .level-label { margin-top: 5px; }
-        .upgrade-button { background-color: orange; color: white; border: none; border-radius: 5px; padding: 5px 10px; cursor: pointer; transition: background-color 0.3s; }
-        .upgrade-button:disabled { background-color: gray; cursor: not-allowed; }
-        .not-enough-money { color: red; }
-        .balance { margin-top: 10px; }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Shop</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+  <style>
+    body {
+      background-color: black;
+      color: white;
+      font-family: Arial, sans-serif;
+      text-align: center;
+      margin: 0;
+      padding: 0;
+    }
+
+    .header {
+      padding: 10px;
+      background-color: #000;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+    }
+
+    .shop-container {
+      margin-top: 20px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .item {
+      margin: 20px;
+      position: relative;
+      border: 2px solid #fff;
+      border-radius: 10px;
+      padding: 10px;
+      width: calc(40% - 40px);
+      max-width: 200px;
+      background: rgba(0, 0, 0, 0.5);
+    }
+
+    .item img {
+      width: 100%;
+      height: auto;
+      transition: transform 0.5s, filter 0.5s;
+    }
+
+    .item img:hover {
+      transform: rotateY(180deg);
+      filter: grayscale(100%);
+    }
+
+    .item .price {
+      color: gold;
+      font-weight: bold;
+    }
+
+    .level-bar {
+      width: 100%;
+      background-color: #444;
+      border-radius: 5px;
+    }
+
+    .level-progress {
+      height: 10px;
+      background-color: gold;
+      border-radius: 5px;
+    }
+
+    .level-label {
+      margin-top: 5px;
+    }
+
+    .upgrade-button {
+      background-color: orange;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      padding: 5px 10px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    .upgrade-button:disabled {
+      background-color: gray;
+      cursor: not-allowed;
+    }
+
+    .not-enough-money {
+      color: red;
+    }
+
+    .balance {
+      margin-top: 10px;
+    }
+
+    .max {
+      background-color: green;
+      color: black;
+    }
+  </style>
 </head>
+
 <body>
-    <div class="header">
-        <button onclick="window.location.href='index.html'" style="position: absolute; left: 10px;"><i class="fas fa-arrow-left"></i></button>
-        <h1>Shop</h1>
-        <p class="balance" id="balance">Balance: 40000 Coins</p>
-    </div>
-    <div class="shop-container" id="shop-container">
-        <!-- Items will be dynamically added here -->
-    </div>
+  <div class="header">
+    <button onclick="window.location.href='index.html'" style="position: absolute; left: 10px;"><i
+        class="fas fa-arrow-left"></i></button>
+    <h1>Shop</h1>
+    <p class="balance" id="balance">Balance: 0 Coins</p>
+  </div>
+  <div class="shop-container" id="shop-container">
+    <!-- Items will be dynamically added here -->
+  </div>
 
-    <script>
-        let currentUser;
+  <script>
+        const shopContainer = document.getElementById('shop-container');
+        const balanceDisplay = document.getElementById('balance');
 
-        window.onload = function() {
-            loadUserData();
-            initializeShop();
+        let balance = 0;
+        let items = [];
+
+        // Файл JSON содержит массив объектов со следующими полями:
+        // - name (название товара)
+        // - image (URL-адрес изображения товара)
+        // - price (стоимость товара)
+        // - level (текущий уровень товара)
+
+        // Fetch the list of items from the JSON file
+        fetch('items.json')
+          .then(res => res.json())
+          .then(data => {
+            items = data;
+
+            // Add the items to the shop container
+            items.forEach(item => {
+              const itemElement = createItemElement(item);
+              shopContainer.appendChild(itemElement);
+            });
+
+            // Update the balance display
             updateBalanceDisplay();
-        };
+          })
+          .catch(err => {
+            console.error('Error fetching items:', err);
+            alert('Error loading the shop. Please try again later.');
+          });
 
-        function loadUserData() {
-            // Загрузить данные пользователя из файла users.json
-            fetch('users.json')
-                .then(response => response.json())
-                .then(data => {
-                    currentUser = data[0]; // Устанавливаем текущего пользователя
-                    updateBalanceDisplay();
-                    initializeShop();
-                })
-                .catch(error => console.error('Ошибка загрузки данных:', error));
+        // Create an item element
+        function createItemElement(item) {
+          const itemElement = document.createElement('div');
+          itemElement.classList.add('item');
+          itemElement.innerHTML = `
+            <img src="${item.image}" alt="${item.name}">
+            <h3 class="name">${item.name}</h3>
+            <p class="price">$${item.price}</p>
+            <div class="level-bar">
+              <div class="level-progress" style="width: ${item.level * 10}%"></div>
+            </div>
+            <p class="level-label">Level ${item.level}/10</p>
+            <button class="upgrade-button" onclick="upgradeItem('${item.name}')">Upgrade</button>
+          `;
+
+          return itemElement;
         }
 
-        function saveUserData() {
-            // Сохранить данные пользователя в файл users.json
-            fetch('/save_data', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify([currentUser])
-            })
-            .then(response => {
-                if (response.ok) {
-                    console.log('Player data saved successfully!');
-                } else {
-                    console.error('Failed to save player data');
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-            });
+        // Upgrade an item
+        function upgradeItem(it
+    ogress" style="width: ${item.level * 10}%"></div>
+            </div>
+            <p class="level-label">Level ${item.level}/10</p>
+            <button class="upgrade-button" onclick="upgradeItem('${item.name}')">Upgrade</button>
+          ;
+
+          return itemElement;
         }
 
+        // Upgrade an item
+        function upgradeItem(itemName) {
+          const item = items.find(item => item.name === itemName);
+
+          // Check if the player has enough money to upgrade the item
+          if (balance < item.price) {
+            alert('Not enough money to upgrade this item.');
+            return;
+          }
+
+          // Upgrade the item
+          item.level++;
+
+          // Update the item's level bar
+          const itemElement = shopContainer.querySelector(.item[data-name="${itemName}"]);
+          const levelBar = itemElement.querySelector('.level-bar');
+          levelBar.querySelector('.level-progress').style.width = ${item.level * 10}%;
+
+          // Update the item's level label
+          itemElement.querySelector('.level-label').textContent = Level ${item.level}/10;
+
+          // Update the balance
+          balance -= item.price;
+          updateBalanceDisplay();
+
+          // Save the upgraded item to the JSON file
+          saveItem(item);
+
+          // Check if the item has reached the maximum level
+          if (item.level === 10) {
+            // Disable the upgrade button
+            itemElement.querySelector('.upgrade-button').disabled = true;
+
+            // Add the 'max' class to the item
+            itemElement.classList.add('max');
+          }
+        }
+
+        // Update the balance display
         function updateBalanceDisplay() {
-            const balanceElement = document.getElementById('balance');
-            balanceElement.textContent = `Balance: ${currentUser.balance} Coins`;
+          balanceDisplay.textContent = Balance: $${balance};
         }
 
-        function initializeShop() {
-            const shopContainer = document.getElementById('shop-container');
-            shopContainer.innerHTML = '';
+        // Save the upgraded item to the JSON file
+        function saveItem(item) {
+          const data = JSON.stringify(items);
 
-            currentUser.items.forEach((item, index) => {
-                const itemPrice = item.price + item.priceIncrement * item.level;
-                const itemElement = document.createElement('div');
-                itemElement.classList.add('item');
-                itemElement.innerHTML = `
-                    <img src="https://via.placeholder.com/200" alt="${item.name}">
-                    <p class="price">Price: ${itemPrice} Coins</p>
-                    <div class="level-bar">
-                        <div class="level-progress" style="width: ${item.level * 10}%"></div>
-                    </div>
-                    <p class="level-label">Level ${item.level}</p>
-                    <button class="upgrade-button" onclick="upgradeItem(${index})" ${currentUser.balance >= itemPrice && item.level < 10 ? '' : 'disabled'}>Upgrade</button>
-                `;
-                shopContainer.appendChild(itemElement);
+          fetch('items.json', {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: data
+          })
+            .then(res => res.json())
+            .then(data => {
+              console.log('Item saved successfully:', data);
+            })
+            .catch(err => {
+              console.error('Error saving item:', err);
+              alert('Error saving your progress. Please try again later.');
             });
         }
-
-        function upgradeItem(index) {
-            const item = currentUser.items[index];
-            const itemPrice = item.price + item.priceIncrement * item.level;
-
-            if (currentUser.balance >= itemPrice && item.level < 10) {
-                currentUser.balance -= itemPrice; // Списать средства с баланса
-                item.level++;
-                const newProfit = Math.round(item.profit * Math.pow(1 + item.profitIncrement, item.level));
-                const newPopulation = Math.round(item.population * Math.pow(1 + item.profitIncrement, item.level));
-                currentUser.totalProfit += newProfit;
-
-                // Обновить данные пользователя
-                item.price += item.priceIncrement;
-                item.profit = newProfit;
-                item.population = newPopulation;
-                currentUser.population += item.population;
-
-                saveUserData();
-                updateBalanceDisplay();
-                initializeShop();
-            } else if (item.level >= 10) {
-                alert('Item is at maximum level!');
-            } else {
-                alert('Not enough coins!');
-            }
-        }
-    </script>
+  </script>
 </body>
+
 </html>
