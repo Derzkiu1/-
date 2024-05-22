@@ -40,6 +40,9 @@
         <button class="upgrade-btn" id="upgrade-btn" onclick="upgradeItem()">Upgrade</button>
         <button class="close-btn" onclick="closePopup()">Close</button>
     </div>
+    <div>
+        <button onclick="window.location.href='https://derzkiu1.github.io/-/'">Open</button>
+    </div>
 
     <script>
         let currentUser = {
@@ -57,16 +60,12 @@
 
         let selectedItemIndex = null;
 
-        async function loadUserData() {
-            try {
-                const response = await fetch('users.json');
-                const data = await response.json();
-                currentUser = data.find(user => user.user_id === currentUser.user_id) || currentUser;
-
+        function loadUserData() {
+            const userData = localStorage.getItem('userData');
+            if  (userData) {
+                currentUser = JSON.parse(userData);
                 updateBalanceDisplay();
                 initializeShop();
-            } catch (error) {
-                console.error('Error loading user data:', error);
             }
         }
 
@@ -129,13 +128,13 @@
             if (currentUser.balance >= itemPrice && item.level < 10) {
                 currentUser.balance -= itemPrice;
                 item.level++;
-                item.price += item.priceIncrement;
+                item.price += item.priceIncrement; // Обновляем цену после улучшения
                 item.profit = Math.round(item.profit * 1.1);
                 item.population = Math.round(item.population * 1.1);
                 currentUser.totalProfit += item.profit;
                 currentUser.population += item.population;
 
-                await saveUserData();
+                saveUserData();
 
                 updateBalanceDisplay();
                 initializeShop();
@@ -143,27 +142,14 @@
             }
         }
 
-        async function saveUserData() {
-            try {
-                const response = await fetch('save_user_data.php', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(currentUser)
-                });
-
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-            } catch (error) {
-                console.error('Error saving user data:', error);
-            }
+        function saveUserData() {
+            localStorage.setItem('userData', JSON.stringify(currentUser));
         }
 
         function earnProfit() {
             currentUser.items.forEach(item => {
                 currentUser.balance += item.profit;
+                currentUser.population += item.population;
             });
 
             saveUserData();
@@ -177,3 +163,4 @@
     </script>
 </body>
 </html>
+
