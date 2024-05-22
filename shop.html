@@ -40,9 +40,6 @@
         <button class="upgrade-btn" id="upgrade-btn" onclick="upgradeItem()">Upgrade</button>
         <button class="close-btn" onclick="closePopup()">Close</button>
     </div>
-    <div>
-        <button onclick="window.location.href='https://derzkiu1.github.io/-/'">Open</button>
-    </div>
 
     <script>
         let currentUser = {
@@ -60,12 +57,22 @@
 
         let selectedItemIndex = null;
 
-        function loadUserData() {
-            const userData = localStorage.getItem('userData');
-            if  (userData) {
-                currentUser = JSON.parse(userData);
-                updateBalanceDisplay();
-                initializeShop();
+        async function loadUserData() {
+            try {
+                const response = await fetch('users.json');
+                if (!response.ok) {
+                    throw new Error('Failed to load user data');
+                }
+                const userData = await response.json();
+                currentUser = userData.find(user => user.user_id === currentUser.user_id);
+                if (currentUser) {
+                    updateBalanceDisplay();
+                    initializeShop();
+                } else {
+                    throw new Error('User data not found');
+                }
+            } catch (error) {
+                console.error('Error loading user data:', error);
             }
         }
 
@@ -125,6 +132,8 @@
             const item = currentUser.items[selectedItemIndex];
             const itemPrice = item.price + item.priceIncrement * item.level;
 
+            console.log('Before upgrade:', currentUser);
+
             if (currentUser.balance >= itemPrice && item.level < 10) {
                 currentUser.balance -= itemPrice;
                 item.level++;
@@ -134,7 +143,9 @@
                 currentUser.totalProfit += item.profit;
                 currentUser.population += item.population;
 
-                saveUserData();
+                await saveUserData();
+
+                console.log('After upgrade:', currentUser);
 
                 updateBalanceDisplay();
                 initializeShop();
@@ -149,7 +160,6 @@
         function earnProfit() {
             currentUser.items.forEach(item => {
                 currentUser.balance += item.profit;
-                currentUser.population += item.population;
             });
 
             saveUserData();
@@ -163,4 +173,3 @@
     </script>
 </body>
 </html>
-
