@@ -40,36 +40,6 @@
         <button onclick="window.location.href = 'boost.html'"><i class="fas fa-bolt"></i></button>
     </div>
     <script>
-        function savePlayerData(destination) {
-            const balance = document.getElementById('balance').textContent;
-            const population = document.getElementById('population').textContent;
-            const league = document.getElementById('league').textContent;
-            const userData = {
-                balance: parseInt(balance),
-                population: parseInt(population),
-                league: league
-            };
-
-            fetch('/save_data', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(userData)
-            })
-            .then(response => {
-                if (response.ok) {
-                    console.log('Player data saved successfully!');
-                    window.location.href = destination;
-                } else {
-                    console.error('Failed to save player data');
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-            });
-        }
-
         function updateLeagueAndGif(balance) {
             const leagueElement = document.getElementById('league');
             const gifElement = document.getElementById('leagueGif');
@@ -87,7 +57,6 @@
                 leagueElement.innerHTML = '<i class="fas fa-crown"></i>Правитель';
                 gifElement.src = 'https://i.pinimg.com/originals/80/31/12/803112952a7108f000906544d545256e.gif';
                 leagueContainer.style.backgroundColor = '#721373';
-
             }
         }
 
