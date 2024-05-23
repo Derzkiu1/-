@@ -5,8 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Districts</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Amatic+SC:wght@400;700&family=Comfortaa:wght@300..700&family=Yatra+One&display=swap" rel="stylesheet">
     <style>
-        body { background-color: black; color: white; font-family: Arial, sans-serif; text-align: center; margin: 0; padding: 0; }
+        body { background-color: black; color: white; font-family: "Comfortaa", sans-serif; text-align: center; margin: 0; padding: 0; }
         .header { padding: 10px; background-color: #000; box-shadow: 0 0 10px rgba(0, 0, 0, 0.5); display: flex; justify-content: space-between; align-items: center; }
         .user-info { display: flex; align-items: center; cursor: pointer; }
         .user-info img { width: 50px; height: 50px; border-radius: 50%; margin-right: 10px; }
@@ -14,15 +17,17 @@
         .population { font-size: 18px; margin: 10px 0; }
         .control-panel { width: 100%; display: flex; justify-content: center; background-color: #000; padding: 20px 0; box-sizing: border-box; box-shadow: 0 0 20px rgba(0, 0, 0, 0.5); }
         .control-panel button { background-color: rgba(68, 68, 68, 0.7); color: white; border: none; padding: 10px 20px; margin: 10px; cursor: pointer; border-radius: 10px; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; box-shadow: 0 0 10px rgba(255, 255, 255, 0.5); transition: box-shadow 0.3s, background-color 0.3s; }
-        .control-panel button:hover { background-color: rgba(68, 68, 68, 0.9); box-shadow: 0 0 20px rgba(220, 20, 60, 0.8); }
         .control-panel button img { width: 20px; height: 20px; margin-right: 10px; opacity: 0.7; }
         .control-panel button:hover img { opacity: 1; }
         .gif-container { margin: 50px 0; }
         .gif-container img { max-width: 80%; border: 5px solid white; border-radius: 10px; box-shadow: 0 0 20px rgba(255, 255, 255, 0.5); }
-        .league-container { margin: 2px 0; padding: 10px; background-color: #333; box-shadow: 0 0 20px rgba(0, 0, 0, 0.5); border-radius: 10px; display: inline-block; transition: background-color 0.3s; }
+        .league-container { margin: 20px 0; padding: 10px; background-color: #333; box-shadow: 0 0 20px rgba(0, 0, 0, 0.5); border-radius: 10px; display: inline-block; transition: background-color 0.3s; }
         .league { font-size: 15px; padding: 3px; background-color: rgba(68, 68, 68, 0.7); border-radius: 5px; box-shadow: 0 0 10px rgba(255, 255, 255, 0.3); display: flex; align-items: center; }
         .league i { margin-right: 5px; }
         .user-details { display: none; position: absolute; top: 60px; left: 10px; background-color: #222; padding: 10px; border-radius: 5px; box-shadow: 0 0 10px rgba(255, 255, 255, 0.8); }
+        .level-up-button { margin: 20px; padding: 10px 20px; font-size: 20px;font-family:"Comfortaa", sans-serif; border: none; border-radius: 10px; cursor: pointer; transition: background-color 0.3s; }
+        .level-up-button.disabled { background-color: grey; cursor: not-allowed; }
+        .level-up-button.enabled { background-color: #DC143C; }
     </style>
 </head>
 <body>
@@ -31,64 +36,87 @@
             <img id="userPhoto" src="https://i.pinimg.com/736x/28/51/5a/28515a8c368b635df3f067335d86f6e3.jpg" alt="User Photo">
             <span id="userName">User Name</span>
         </div>
-        <div class="balance">Баланс: <span id="balance">0</span></div>
+        <div class="balance">Balance: <span id="balance">0</span></div>
     </div>
     <div class="user-details" id="userDetails">
         <p>Доход монет в минуту: <span id="coinIncome">0</span></p>
         <p>Доход населения в минуту: <span id="populationIncome">0</span></p>
     </div>
-    <div class="population">Население: <span id="population">0</span></div>
+
+    <div class="population">Population: <span id="population">0</span></div>
     <div class="league-container" id="leagueContainer">
         <div id="league" class="league">Начинающий</div>
     </div>
     <div class="gif-container">
         <img id="leagueGif" src="https://i.pinimg.com/originals/ff/1d/88/ff1d8824966668a2eb271133549d5d79.gif" alt="Gif Image">
     </div>
-    <div class="control-panel">
-        <button onclick="window.location.href = 'shop.html'"><i class="fas fa-shopping-cart"></i></button>
-        <button onclick="window.location.href = 'top.html'"><i class="fas fa-star"></i></button>
-        <button onclick="window.location.href = 'boost.html'"><i class="fas fa-bolt"></i></button>
-    </div>
+    <button id="levelUpButton" class="level-up-button disabled" onclick="levelUp()">Уровень: 1 (Цена: 500)</button>
     <script>
+        let user = null;
+        let level = 1;
+        let levelUpCost = 500;
+        let coinIncomePerSecond = 1; // Доход монет в секунду
+        let populationIncomePerSecond = 1; // Доход населения в секунду
+        let coinIncomePerHour = 50; // Начальный доход монет в час
+        let populationIncomePerHour = 10; // Начальный доход населения в час
+
         function toggleUserDetails() {
             const userDetails = document.getElementById('userDetails');
             userDetails.style.display = userDetails.style.display === 'none' ? 'block' : 'none';
+
+            // Отображение дохода в меню под ником
+            if (userDetails.style.display === 'block') {
+                document.getElementById('incomeDetails').style.display = 'block';
+                updateIncome(); // Обновляем доход при открытии
+            } else {
+                document.getElementById('incomeDetails').style.display = 'none';
+            }
         }
 
         async function loadUserData() {
             try {
                 const response = await fetch('users.json');
                 const userData = await response.json();
-                const user = userData[0]; // Assuming a single user for now
+                user = userData[0]; // Предполагаем, что есть только один пользователь
                 document.getElementById('balance').textContent = user.balance;
                 document.getElementById('population').textContent = user.population;
                 document.getElementById('userName').textContent = user.username;
-                updateLeagueAndGif(user.balance);
+                updateLeagueAndGif(user.population); // Обновляем лигу на основе населения
+                updateLevelUpButton();
 
-                // Update incomes
+                // Обновляем доходы
                 let coinIncome = 0;
                 let populationIncome = 0;
                 user.items.forEach(item => {
                     coinIncome += item.profit * item.level;
                     populationIncome += item.population * item.level;
                 });
+
+                // Переводим доход в час
+                coinIncome = Math.ceil(coinIncome * 3600);
+                populationIncome = Math.ceil(populationIncome * 3600);
+
                 document.getElementById('coinIncome').textContent = coinIncome;
                 document.getElementById('populationIncome').textContent = populationIncome;
+
+                // Запускаем интервал дохода
+                setInterval(updateUserIncome, 3600); // каждую секунду
+
             } catch (error) {
                 console.error('Ошибка загрузки данных:', error);
             }
         }
 
-        function updateLeagueAndGif(balance) {
+        function updateLeagueAndGif(population) {
             const leagueElement = document.getElementById('league');
             const gifElement = document.getElementById('leagueGif');
             const leagueContainer = document.getElementById('leagueContainer');
 
-            if (balance < 10000) {
+            if (population < 10000) {
                 leagueElement.innerHTML = '<i class="fas fa-user"></i>Начинающий';
                 gifElement.src = 'https://i.pinimg.com/originals/ff/1d/88/ff1d8824966668a2eb271133549d5d79.gif';
                 leagueContainer.style.backgroundColor = '#823316';
-            } else if (balance < 50000) {
+            } else if (population < 50000) {
                 leagueElement.innerHTML = '<i class="fas fa-user-graduate"></i>Опытный';
                 gifElement.src = 'https://cdnb.artstation.com/p/assets/images/images/052/004/767/original/yurii-ray-06-gif-export-200.gif?1658731969';
                 leagueContainer.style.backgroundColor = '#940A36';
@@ -97,6 +125,63 @@
                 gifElement.src = 'https://i.pinimg.com/originals/80/31/12/803112952a7108f000906544d545256e.gif';
                 leagueContainer.style.backgroundColor = '#721373';
             }
+        }
+
+        function updateLevelUpButton() {
+            const levelUpButton = document.getElementById('levelUpButton');
+            levelUpButton.textContent = `Уровень: ${level} (Цена: ${levelUpCost})`;
+
+            if (user.balance >= levelUpCost) {
+                levelUpButton.classList.remove('disabled');
+                levelUpButton.classList.add('enabled');
+            } else {
+                levelUpButton.classList.remove('enabled');
+                levelUpButton.classList.add('disabled');
+            }
+        }
+
+        async function levelUp() {
+            if (user.balance >= levelUpCost) {
+                user.balance -= levelUpCost;
+                level += 1;
+                levelUpCost = Math.floor(levelUpCost * 1.65); // +65%
+                coinIncomePerHour += Math.ceil(coinIncomePerHour * 0.5); // Доход монет в час увеличивается на 50%
+                populationIncomePerHour += Math.ceil(populationIncomePerHour * 0.5); // Доход населения в час увеличивается на 50%
+
+                await saveUserData();
+
+                document.getElementById('balance').textContent = user.balance;
+                document.getElementById('coinIncome').textContent = coinIncomePerHour;
+                document.getElementById('populationIncome').textContent = populationIncomePerHour;
+                updateLevelUpButton();
+                updateLeagueAndGif(user.population); // Обновляем лигу на основе населения
+            }
+        }
+
+        async function saveUserData() {
+            try {
+                await fetch('/save_data', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(user)
+                });
+            } catch (error) {
+                console.error('Ошибка сохранения данных:', error);
+            }
+        }
+
+        async function updateUserIncome() {
+            user.balance += coinIncomePerSecond;
+            user.population += populationIncomePerSecond;
+            document.getElementById('balance').textContent = user.balance;
+            document.getElementById('population').textContent = user.population;
+            await saveUserData();
+        }
+
+        function updateIncome() {
+            const userIncomeElement = document.getElementById('userIncome');
+            const userIncome = (coinIncomePerHour + (level - 1) * coinIncomePerHour) + (populationIncomePerHour + (level - 1) * populationIncomePerHour);
+            userIncomeElement.textContent = userIncome;
         }
 
         window.onload = loadUserData;
