@@ -7,169 +7,117 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <style>
         body { background-color: black; color: white; font-family: Arial, sans-serif; text-align: center; margin: 0; padding: 0; }
-        .header { padding: 10px; background-color: #000; box-shadow: 0 0 10px rgba(0, 0, 0, 0.5); position: relative; }
-        .shop-container { margin-top: 20px; display: flex; flex-wrap: wrap; justify-content: center; }
-        .item { margin: 20px; border: 2px solid #fff; border-radius: 10px; padding: 10px; width: calc(40% - 40px); max-width: 200px; background: rgba(255, 255, 255, 0.1); cursor: pointer; transition: transform 0.3s; }
-        .item:hover { transform: scale(1.05); }
-        .item img { width: 100%; height: auto; border-radius: 10px; }
-        .item .price { color: gold; font-weight: bold; margin: 10px 0; }
-        .level-bar { width: 100%; background-color: #444; border-radius: 5px; margin: 5px 0; }
-        .level-progress { height: 10px; background-color: gold; border-radius: 5px; }
-        .level-label { margin-top: 5px; }
-        .popup { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #333; border-radius: 10px; padding: 20px; display: none; }
-        .popup h2 { margin: 0 0 10px; }
-        .popup .close-btn { background: red; color: white; border: none; border-radius: 5px; padding: 5px 10px; cursor: pointer; }
-        .popup .upgrade-btn { background: orange; color: white; border: none; border-radius: 5px; padding: 5px 10px; cursor: pointer; margin-top: 10px; }
-        .popup .upgrade-btn:disabled { background: gray; cursor: not-allowed; }
-        .balance { margin-top: 10px; }
+        .header { padding: 10px; background-color: #000; box-shadow: 0 0 10px rgba(0, 0, 0, 0.5); }
+        .back-button { position: absolute; top: 10px; left: 10px; background-color: rgba(68, 68, 68, 0.7); color: white; border: none; padding: 10px; cursor: pointer; border-radius: 10px; display: flex; align-items: center; justify-content: center; transition: background-color 0.3s; }
+        .back-button:hover { background-color: rgba(68, 68, 68, 0.9); }
+        .back-button i { margin-right: 5px; }
+        .item { margin: 20px auto; padding: 10px; background-color: #333; border-radius: 10px; box-shadow: 0 0 10px rgba(255, 255, 255, 0.3); max-width: 400px; text-align: left; }
+        .item img { width: 100px; height: 100px; border-radius: 10px; margin-right: 20px; }
+        .item h2 { font-size: 20px; margin-bottom: 5px; }
+        .item p { margin: 5px 0; }
+        .item button { background-color: rgba(255, 0, 0, 0.7); color: white; border: none; padding: 10px 20px; margin-top: 10px; cursor: pointer; border-radius: 10px; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; box-shadow: 0 0 10px rgba(255, 255, 255, 0.5); transition: box-shadow 0.3s, background-color 0.3s; }
+        .item button:disabled { background-color: grey; cursor: not-allowed; }
+        .item button:hover { background-color: rgba(255, 0, 0, 0.9); box-shadow: 0 0 20px rgba(220, 20, 60, 0.8); }
+        .item button img { width: 20px; height: 20px; margin-right: 5px; opacity: 0.7; }
+        .item button:hover img { opacity: 1; }
     </style>
 </head>
 <body>
     <div class="header">
-        <button onclick="window.location.href='index.html'" style="position: absolute; left: 10px;"><i class="fas fa-arrow-left"></i></button>
         <h1>Shop</h1>
-        <p class="balance" id="balance">Balance: 0 Coins</p>
+        <button class="back-button" onclick="window.location.href = 'index.html'"><i class="fas fa-arrow-left"></i></button>
     </div>
-    <div class="shop-container" id="shop-container">
-        <!-- Items will be dynamically added here -->
+    <div class="item">
+        <img src="https://via.placeholder.com/100" alt="Item 1">
+        <h2>Помощь бедным</h2>
+        <p>Цена: 100</p>
+        <p>Доходность в минуту: 50 монет, 10 населения</p>
+        <button data-item="Помощь бедным" onclick="buyItem('Помощь бедным')">Купить</button>
     </div>
-    <div class="popup" id="item-popup">
-        <h2 id="popup-title">Item Title</h2>
-        <p id="popup-profit">Profit: 0 Coins/min</p>
-        <p id="popup-population">Population: 0/min</p>
-        <button class="upgrade-btn" id="upgrade-btn" onclick="upgradeItem()">Upgrade</button>
-        <button class="close-btn" onclick="closePopup()">Close</button>
+    <div class="item">
+        <img src="https://via.placeholder.com/100" alt="Item 2">
+        <h2>Уборка улиц</h2>
+        <p>Цена: 250</p>
+        <p>Доходность в минуту: 100 монет, 20 населения</p>
+        <button data-item="Уборка улиц" onclick="buyItem('Уборка улиц')">Купить</button>
     </div>
-
+    <!-- Add more items here -->
     <script>
-        let currentUser = {
-            "user_id": 1,
-            "username": "player1",
-            "first_name": "Player 1",
-            "league": "Начинающий",
-            "balance": 0,
-            "population": 0,
-            "totalProfit": 0,
-            "items": [
-                { "name": "Помощь бедным", "price": 100, "priceIncrement": 25, "profit": 25, "profitIncrement": 2.5, "population": 10, "populationIncrement": 1, "level": 0 }
-            ]
-        };
-
-        let selectedItemIndex = null;
-
-        async function loadUserData() {
+        async function buyItem(itemName) {
             try {
                 const response = await fetch('users.json');
-                if (!response.ok) {
-                    throw new Error('Failed to load user data');
-                }
                 const userData = await response.json();
-                currentUser = userData.find(user => user.user_id === currentUser.user_id);
-                if (currentUser) {
-                    updateBalanceDisplay();
-                    initializeShop();
+                const user = userData[0]; // Предполагаем, что есть только один пользователь
+                const item = user.items.find(i => i.name === itemName);
+                if (user.balance >= item.price) {
+                    user.balance -= item.price;
+                    item.price += item.priceIncrement;
+                    item.profit += item.profitIncrement;
+                    item.population += item.populationIncrement;
+                    item.level += 1;
+                    // Сохраняем обновленные данные пользователя и товаров
+                    await fetch('/save_data', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(userData)
+                    });
+                    alert(`Вы успешно купили ${itemName}! Теперь вы будете получать прибыль.`);
+                    startHourlyTimer(); // Запускаем таймер после покупки товара
+                    startProfitTimer(item); // Запускаем таймер начисления прибыли
+                    updateButtonStyle(itemName); // Обновляем стиль кнопки после покупки товара
                 } else {
-                    throw new Error('User data not found');
+                    alert('Недостаточно средств!');
                 }
             } catch (error) {
-                console.error('Error loading user data:', error);
+                console.error('Ошибка при покупке товара:', error);
             }
         }
 
-        function updateBalanceDisplay() {
-            const balanceElement = document.getElementById('balance');
-            balanceElement.textContent = `Balance: ${currentUser.balance} Coins`;
+        // Функция для начисления прибыли от товаров каждую секунду
+        function startProfitTimer(item) {
+            setInterval(() => {
+                const userData = fetch('users.json').then(response => response.json());
+                userData.then(data => {
+                    const user = data[0];
+                    user.balance += item.profit;
+                    user.population += item.population;
+                    document.getElementById('user-balance').innerText = `Баланс: ${user.balance}`;
+                    document.getElementById('user-population').innerText = `Население: ${user.population}`;
+                    fetch('/save_data', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(data)
+                    });
+                });
+            }, 1000); // 1000 milliseconds = 1 second
         }
 
-        function initializeShop() {
-            const shopContainer = document.getElementById('shop-container');
-            shopContainer.innerHTML = '';
-
-            currentUser.items.forEach((item, index) => {
-                const itemPrice = item.price + item.priceIncrement * item.level;
-                const itemElement = document.createElement('div');
-                itemElement.classList.add('item');
-                itemElement.innerHTML = `
-                    <img src="https://via.placeholder.com/200" alt="${item.name}">
-                    <p class="price">Price: ${itemPrice} Coins</p>
-                    <div class="level-bar">
-                        <div class="level-progress" style="width: ${item.level * 10}%"></div>
-                    </div>
-                    <p class="level-label">Level ${item.level}</p>
-                `;
-                itemElement.onclick = () => openPopup(index);
-                shopContainer.appendChild(itemElement);
-            });
-        }
-
-        function openPopup(index) {
-            selectedItemIndex = index;
-            const item = currentUser.items[index];
-            const popup = document.getElementById('item-popup');
-            const upgradeButton = document.getElementById('upgrade-btn');
-            const itemPrice = item.price + item.priceIncrement * item.level;
-
-            document.getElementById('popup-title').textContent = item.name;
-            document.getElementById('popup-profit').textContent = `Profit: ${item.profit} Coins/min`;
-            document.getElementById('popup-population').textContent = `Population: ${item.population}/min`;
-
-            if (currentUser.balance >= itemPrice && item.level < 10) {
-                upgradeButton.disabled = false;
-            } else {
-                upgradeButton.disabled = true;
-            }
-
-            popup.style.display = 'block';
-        }
-
-        function closePopup() {
-            document.getElementById('item-popup').style.display = 'none';
-        }
-
-        async function upgradeItem() {
-            if (selectedItemIndex === null) return;
-
-            const item = currentUser.items[selectedItemIndex];
-            const itemPrice = item.price + item.priceIncrement * item.level;
-
-            console.log('Before upgrade:', currentUser);
-
-            if (currentUser.balance >= itemPrice && item.level < 10) {
-                currentUser.balance -= itemPrice;
-                item.level++;
-                item.price += item.priceIncrement; // Обновляем цену после улучшения
-                item.profit = Math.round(item.profit * 1.1);
-                item.population = Math.round(item.population * 1.1);
-                currentUser.totalProfit += item.profit;
-                currentUser.population += item.population;
-
-                await saveUserData();
-
-                console.log('After upgrade:', currentUser);
-
-                updateBalanceDisplay();
-                initializeShop();
-                closePopup();
+        // Функция для обновления стиля кнопки в зависимости от баланса игрока
+        async function updateButtonStyle(itemName) {
+            try {
+                const response = await fetch('users.json');
+                const userData = await response.json();
+                const user = userData[0]; // Предполагаем, что есть только один пользователь
+                const item = user.items.find(i => i.name === itemName);
+                const button = document.querySelector(`button[data-item="${itemName}"]`);
+                if (user.balance >= item.price) {
+                    button.style.backgroundColor = 'rgba(255, 0, 0, 0.7)';
+                    button.style.cursor = 'pointer';
+                    button.disabled = false;
+                } else {
+                    button.style.backgroundColor = 'grey';
+                    button.style.cursor = 'not-allowed';
+                    button.disabled = true;
+                }
+            } catch (error) {
+                console.error('Ошибка при обновлении стиля кнопки:', error);
             }
         }
-
-        function saveUserData() {
-            localStorage.setItem('userData', JSON.stringify(currentUser));
-        }
-
-        function earnProfit() {
-            currentUser.items.forEach(item => {
-                currentUser.balance += item.profit;
-            });
-
-            saveUserData();
-            updateBalanceDisplay();
-        }
-
-        window.onload = function() {
-            loadUserData();
-            setInterval(earnProfit, 60000); // Начисление дохода каждую минуту
-        };
     </script>
 </body>
 </html>
+
