@@ -1,14 +1,23 @@
 [
     {
-        "user_id": 1,
-        "username": "player1",
-        "first_name": "Player 1",
+        "user_id": 708250672,
+        "username": "sanyasem",
+        "first_name": "Sancho",
         "league": "Начинающий",
-        "balance": 1000,
-        "population": 0,
+        "balance": 500,
+        "population": 150,
         "totalProfit": 0,
         "items": [
-            { "name": "Помощь бедным", "price": 100, "priceIncrement": 25, "profit": 25, "profitIncrement": 2.5, "population": 10, "populationIncrement": 1, "level": 0 }
+            {
+                "name": "Помощь бедным",
+                "price": 100,
+                "priceIncrement": 25,
+                "profit": 25,
+                "profitIncrement": 2.5,
+                "population": 10,
+                "populationIncrement": 1,
+                "level": 0
+            }
         ]
     }
 ]
