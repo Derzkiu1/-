@@ -7,7 +7,9 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <style>
         body { background-color: black; color: white; font-family: Arial, sans-serif; text-align: center; margin: 0; padding: 0; }
-        .header { padding: 10px; background-color: #000; box-shadow: 0 0 10px rgba(0, 0, 0, 0.5); }
+        .header { padding: 10px; background-color: #000; box-shadow: 0 0 10px rgba(0, 0, 0, 0.5); display: flex; justify-content: space-between; align-items: center; }
+        .user-info { display: flex; align-items: center; cursor: pointer; }
+        .user-info img { width: 50px; height: 50px; border-radius: 50%; margin-right: 10px; }
         .balance { font-size: 22px; margin: 15px 0; }
         .population { font-size: 18px; margin: 10px 0; }
         .control-panel { width: 100%; display: flex; justify-content: center; background-color: #000; padding: 20px 0; box-sizing: border-box; box-shadow: 0 0 20px rgba(0, 0, 0, 0.5); }
@@ -20,16 +22,24 @@
         .league-container { margin: 2px 0; padding: 10px; background-color: #333; box-shadow: 0 0 20px rgba(0, 0, 0, 0.5); border-radius: 10px; display: inline-block; transition: background-color 0.3s; }
         .league { font-size: 15px; padding: 3px; background-color: rgba(68, 68, 68, 0.7); border-radius: 5px; box-shadow: 0 0 10px rgba(255, 255, 255, 0.3); display: flex; align-items: center; }
         .league i { margin-right: 5px; }
+        .user-details { display: none; position: absolute; top: 60px; left: 10px; background-color: #222; padding: 10px; border-radius: 5px; box-shadow: 0 0 10px rgba(255, 255, 255, 0.8); }
     </style>
 </head>
 <body>
     <div class="header">
-        <h1>Districts</h1>
-        <div class="balance">Баланс: <span id="balance">0</span></div>
-        <div class="population">Население: <span id="population">0</span></div>
-        <div class="league-container" id="leagueContainer">
-            <div id="league" class="league">Начинающий</div>
+        <div class="user-info" onclick="toggleUserDetails()">
+            <img id="userPhoto" src="https://i.pinimg.com/736x/28/51/5a/28515a8c368b635df3f067335d86f6e3.jpg" alt="User Photo">
+            <span id="userName">User Name</span>
         </div>
+        <div class="balance">Баланс: <span id="balance">0</span></div>
+    </div>
+    <div class="user-details" id="userDetails">
+        <p>Доход монет в минуту: <span id="coinIncome">0</span></p>
+        <p>Доход населения в минуту: <span id="populationIncome">0</span></p>
+    </div>
+    <div class="population">Население: <span id="population">0</span></div>
+    <div class="league-container" id="leagueContainer">
+        <div id="league" class="league">Начинающий</div>
     </div>
     <div class="gif-container">
         <img id="leagueGif" src="https://i.pinimg.com/originals/ff/1d/88/ff1d8824966668a2eb271133549d5d79.gif" alt="Gif Image">
@@ -40,6 +50,35 @@
         <button onclick="window.location.href = 'boost.html'"><i class="fas fa-bolt"></i></button>
     </div>
     <script>
+        function toggleUserDetails() {
+            const userDetails = document.getElementById('userDetails');
+            userDetails.style.display = userDetails.style.display === 'none' ? 'block' : 'none';
+        }
+
+        async function loadUserData() {
+            try {
+                const response = await fetch('users.json');
+                const userData = await response.json();
+                const user = userData[0]; // Assuming a single user for now
+                document.getElementById('balance').textContent = user.balance;
+                document.getElementById('population').textContent = user.population;
+                document.getElementById('userName').textContent = user.username;
+                updateLeagueAndGif(user.balance);
+
+                // Update incomes
+                let coinIncome = 0;
+                let populationIncome = 0;
+                user.items.forEach(item => {
+                    coinIncome += item.profit * item.level;
+                    populationIncome += item.population * item.level;
+                });
+                document.getElementById('coinIncome').textContent = coinIncome;
+                document.getElementById('populationIncome').textContent = populationIncome;
+            } catch (error) {
+                console.error('Ошибка загрузки данных:', error);
+            }
+        }
+
         function updateLeagueAndGif(balance) {
             const leagueElement = document.getElementById('league');
             const gifElement = document.getElementById('leagueGif');
@@ -57,19 +96,6 @@
                 leagueElement.innerHTML = '<i class="fas fa-crown"></i>Правитель';
                 gifElement.src = 'https://i.pinimg.com/originals/80/31/12/803112952a7108f000906544d545256e.gif';
                 leagueContainer.style.backgroundColor = '#721373';
-            }
-        }
-
-        async function loadUserData() {
-            try {
-                const response = await fetch('users.json');
-                const userData = await response.json();
-                const user = userData[0];
-                document.getElementById('balance').textContent = user.balance;
-                document.getElementById('population').textContent = user.population;
-                updateLeagueAndGif(user.balance);
-            } catch (error) {
-                console.error('Ошибка загрузки данных:', error);
             }
         }
 
