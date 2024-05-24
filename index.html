@@ -25,7 +25,7 @@
         .league { font-size: 15px; padding: 3px; background-color: rgba(68, 68, 68, 0.7); border-radius: 5px; box-shadow: 0 0 10px rgba(255, 255, 255, 0.3); display: flex; align-items: center; }
         .league i { margin-right: 5px; }
         .user-details { display: none; position: absolute; top: 60px; left: 10px; background-color: #222; padding: 10px; border-radius: 5px; box-shadow: 0 0 10px rgba(255, 255, 255, 0.8); }
-        .level-up-button { margin: 20px; padding: 10px 20px; font-size: 20px;font-family:"Comfortaa", sans-serif; border: none; border-radius: 10px; cursor: pointer; transition: background-color 0.3s; }
+        .level-up-button { margin: 20px; padding: 10px 20px; font-size: 20px; font-family: "Comfortaa", sans-serif; border: none; border-radius: 10px; cursor: pointer; transition: background-color 0.3s; }
         .level-up-button.disabled { background-color: grey; cursor: not-allowed; }
         .level-up-button.enabled { background-color: #DC143C; }
     </style>
@@ -52,7 +52,7 @@
     </div>
     <button id="levelUpButton" class="level-up-button disabled" onclick="levelUp()">Уровень: 1 (Цена: 500)</button>
     <script>
-        let user = null;
+        let user = { balance: 0, population: 0, username: "User Name" };
         let level = 1;
         let levelUpCost = 500;
         let coinIncomePerSecond = 1; // Доход монет в секунду
@@ -73,37 +73,38 @@
             }
         }
 
-        async function loadUserData() {
-            try {
-                const response = await fetch('users.json');
-                const userData = await response.json();
-                user = userData[0]; // Предполагаем, что есть только один пользователь
+        function saveUserDataToLocal() {
+            const userData = {
+                balance: user.balance,
+                population: user.population,
+                level: level,
+                levelUpCost: levelUpCost,
+                coinIncomePerHour: coinIncomePerHour,
+                populationIncomePerHour: populationIncomePerHour
+            };
+            localStorage.setItem('userData', JSON.stringify(userData));
+            console.log('Данные сохранены локально');
+        }
+
+        function autoSaveUserData() {
+            saveUserDataToLocal();
+            setTimeout(autoSaveUserData, 30000); // Автосохранение каждые 30 секунд
+        }
+
+        function loadUserData() {
+            const userDataString = localStorage.getItem('userData');
+            if (userDataString) {
+                const userData = JSON.parse(userDataString);
+                user = userData;
+                level = userData.level;
+                levelUpCost = userData.levelUpCost;
+                coinIncomePerHour = userData.coinIncomePerHour;
+                populationIncomePerHour = userData.populationIncomePerHour;
                 document.getElementById('balance').textContent = user.balance;
                 document.getElementById('population').textContent = user.population;
                 document.getElementById('userName').textContent = user.username;
-                updateLeagueAndGif(user.population); // Обновляем лигу на основе населения
+                updateLeagueAndGif(user.population);
                 updateLevelUpButton();
-
-                // Обновляем доходы
-                let coinIncome = 0;
-                let populationIncome = 0;
-                user.items.forEach(item => {
-                    coinIncome += item.profit * item.level;
-                    populationIncome += item.population * item.level;
-                });
-
-                // Переводим доход в час
-                coinIncome = Math.ceil(coinIncome * 3600);
-                populationIncome = Math.ceil(populationIncome * 3600);
-
-                document.getElementById('coinIncome').textContent = coinIncome;
-                document.getElementById('populationIncome').textContent = populationIncome;
-
-                // Запускаем интервал дохода
-                setInterval(updateUserIncome, 3600); // каждую секунду
-
-            } catch (error) {
-                console.error('Ошибка загрузки данных:', error);
             }
         }
 
@@ -140,7 +141,7 @@
             }
         }
 
-        async function levelUp() {
+        function levelUp() {
             if (user.balance >= levelUpCost) {
                 user.balance -= levelUpCost;
                 level += 1;
@@ -148,7 +149,7 @@
                 coinIncomePerHour += Math.ceil(coinIncomePerHour * 0.5); // Доход монет в час увеличивается на 50%
                 populationIncomePerHour += Math.ceil(populationIncomePerHour * 0.5); // Доход населения в час увеличивается на 50%
 
-                await saveUserData();
+                saveUserDataToLocal();
 
                 document.getElementById('balance').textContent = user.balance;
                 document.getElementById('coinIncome').textContent = coinIncomePerHour;
@@ -158,24 +159,12 @@
             }
         }
 
-        async function saveUserData() {
-            try {
-                await fetch('/save_data', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(user)
-                });
-            } catch (error) {
-                console.error('Ошибка сохранения данных:', error);
-            }
-        }
-
-        async function updateUserIncome() {
+        function updateUserIncome() {
             user.balance += coinIncomePerSecond;
             user.population += populationIncomePerSecond;
             document.getElementById('balance').textContent = user.balance;
             document.getElementById('population').textContent = user.population;
-            await saveUserData();
+            saveUserDataToLocal();
         }
 
         function updateIncome() {
@@ -184,7 +173,12 @@
             userIncomeElement.textContent = userIncome;
         }
 
-        window.onload = loadUserData;
+        window.onload = function() {
+            loadUserData();
+            autoSaveUserData();
+        };
+
+        setInterval(updateUserIncome, 1000); // каждую секунду
     </script>
 </body>
 </html>
