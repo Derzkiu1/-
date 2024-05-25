@@ -61,28 +61,6 @@
         let coinIncomePerHour = 50; // Начальный доход монет в час
         let populationIncomePerHour = 10; // Начальный доход населения в час
 
-        async function fetchUserData() {
-            try {
-                const response = await fetch('users.json');
-                const data = await response.json();
-                return data;
-            } catch (error) {
-                console.error('Ошибка при загрузке данных пользователей:', error);
-                return [];
-            }
-        }
-
-        async function updateUserRank() {
-            const users = await fetchUserData();
-            if (users.length > 0) {
-                const sortedUsers = users.sort((a, b) => b.population - a.population);
-                const rank = sortedUsers.findIndex(u => u.username === user.username) + 1;
-                document.getElementById('userRank').textContent = rank ? `#${rank}` : 'Не найдено';
-            } else {
-                document.getElementById('userRank').textContent = 'Ошибка загрузки данных';
-            }
-        }
-
         function toggleUserDetails() {
             const userDetails = document.getElementById('userDetails');
             userDetails.style.display = userDetails.style.display === 'none' ? 'block' : 'none';
@@ -107,7 +85,7 @@
                 populationIncomePerHour: populationIncomePerHour
             };
             localStorage.setItem('userData', JSON.stringify(userData));
-            console.log('Данные сохранены локально');
+            saveAllUsersData();
         }
 
         function autoSaveUserData() {
@@ -132,13 +110,40 @@
                 updateLeagueAndGif(user.population); // Обновляем лигу на основе населения
                 updateIncome(); // Добавляем вызов функции для обновления дохода в меню
             } else {
-                // Первоначальная установка начальных значений для нового пользователя
-                user.balance = 500;
-                user.population = 150;
-                document.getElementById('balance').textContent = user.balance;
-                document.getElementById('population').textContent = user.population;
+                // Установим начальные значения для нового пользователя
                 saveUserDataToLocal();
             }
+        }
+
+        function saveAllUsersData() {
+            const allUsersString = localStorage.getItem('allUsers');
+            let allUsers = allUsersString ? JSON.parse(allUsersString) : [];
+            const currentUserIndex = allUsers.findIndex(u => u.username === user.username);
+
+            if (currentUserIndex !== -1) {
+                // Обновить данные существующего пользователя
+                allUsers[currentUserIndex] = { ...user, level, levelUpCost, coinIncomePerHour, populationIncomePerHour };
+            } else {
+                // Добавить нового пользователя
+                allUsers.push({ ...user, level, levelUpCost, coinIncomePerHour, populationIncomePerHour });
+            }
+
+            localStorage.setItem('allUsers', JSON.stringify(allUsers));
+        }
+
+        function getAllUsersData() {
+            const allUsersString = localStorage.getItem('allUsers');
+            return allUsersString ? JSON.parse(allUsersString) : [];
+        }
+
+        function updateUserRank() {
+            const allUsers = getAllUsersData();
+            allUsers.sort((a, b) => b.population - a.population); // Сортировка пользователей по населению
+
+            const currentUserIndex = allUsers.findIndex(u => u.username === user.username);
+            const userRank = currentUserIndex !== -1 ? currentUserIndex + 1 : 'Не в топе';
+
+            document.getElementById('userRank').textContent = userRank;
         }
 
         function updateLeagueAndGif(population) {
@@ -216,4 +221,3 @@
     </script>
 </body>
 </html>
-
