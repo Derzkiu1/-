@@ -61,6 +61,21 @@
         let coinIncomePerHour = 50; // Начальный доход монет в час
         let populationIncomePerHour = 10; // Начальный доход населения в час
 
+        // Загрузка данных из users.json
+        async function loadUsersFromFile() {
+            try {
+                const response = await fetch('users.json');
+                if (!response.ok) {
+                    throw new Error('Network response was not ok ' + response.statusText);
+                }
+                const data = await response.json();
+                return data;
+            } catch (error) {
+                console.error('Error fetching users:', error);
+                return [];
+            }
+        }
+
         function toggleUserDetails() {
             const userDetails = document.getElementById('userDetails');
             userDetails.style.display = userDetails.style.display === 'none' ? 'block' : 'none';
@@ -103,47 +118,44 @@
                 levelUpCost = userData.levelUpCost;
                 coinIncomePerHour = userData.coinIncomePerHour;
                 populationIncomePerHour = userData.populationIncomePerHour;
-
-                document.getElementById('balance').textContent = user.balance;
-                document.getElementById('population').textContent = user.population;
-                updateLevelUpButton();
-                updateLeagueAndGif(user.population); // Обновляем лигу на основе населения
-                updateIncome(); // Добавляем вызов функции для обновления дохода в меню
-            } else {
-                // Установим начальные значения для нового пользователя
-                saveUserDataToLocal();
             }
+            document.getElementById('balance').textContent = user.balance;
+            document.getElementById('population').textContent = user.population;
+            updateLevelUpButton();
+            updateLeagueAndGif(user.population);
+            updateUserRank();
         }
 
         function saveAllUsersData() {
-            const allUsersString = localStorage.getItem('allUsers');
-            let allUsers = allUsersString ? JSON.parse(allUsersString) : [];
-            const currentUserIndex = allUsers.findIndex(u => u.username === user.username);
+            loadUsersFromFile().then(allUsers => {
+                const currentUserIndex = allUsers.findIndex(u => u.username === user.username);
 
-            if (currentUserIndex !== -1) {
-                // Обновить данные существующего пользователя
-                allUsers[currentUserIndex] = { ...user, level, levelUpCost, coinIncomePerHour, populationIncomePerHour };
-            } else {
-                // Добавить нового пользователя
-                allUsers.push({ ...user, level, levelUpCost, coinIncomePerHour, populationIncomePerHour });
-            }
+                if (currentUserIndex !== -1) {
+                    // Обновить данные существующего пользователя
+                    allUsers[currentUserIndex] = { ...user, level, levelUpCost, coinIncomePerHour, populationIncomePerHour };
+                } else {
+                    // Добавить нового пользователя
+                    allUsers.push({ ...user, level, levelUpCost, coinIncomePerHour, populationIncomePerHour });
+                }
 
-            localStorage.setItem('allUsers', JSON.stringify(allUsers));
+                // Сохраняем обновленные данные обратно в файл
+                localStorage.setItem('allUsers', JSON.stringify(allUsers));
+            });
         }
 
         function getAllUsersData() {
-            const allUsersString = localStorage.getItem('allUsers');
-            return allUsersString ? JSON.parse(allUsersString) : [];
+            return loadUsersFromFile();
         }
 
         function updateUserRank() {
-            const allUsers = getAllUsersData();
-            allUsers.sort((a, b) => b.population - a.population); // Сортировка пользователей по населению
+            getAllUsersData().then(allUsers => {
+                allUsers.sort((a, b) => b.population - a.population); // Сортировка пользователей по населению
 
-            const currentUserIndex = allUsers.findIndex(u => u.username === user.username);
-            const userRank = currentUserIndex !== -1 ? currentUserIndex + 1 : 'Не в топе';
+                const currentUserIndex = allUsers.findIndex(u => u.username === user.username);
+                const userRank = currentUserIndex !== -1 ? currentUserIndex + 1 : 'Не в топе';
 
-            document.getElementById('userRank').textContent = userRank;
+                document.getElementById('userRank').textContent = userRank;
+            });
         }
 
         function updateLeagueAndGif(population) {
