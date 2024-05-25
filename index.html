@@ -56,12 +56,55 @@
         let user = { balance: 0, population: 0, username: "User Name" };
         let level = 1;
         let levelUpCost = 500;
-        let coinIncomePerSecond = 1; // Доход монет в секунду
-        let populationIncomePerSecond = 1; // Доход населения в секунду
-        let coinIncomePerHour = 50; // Начальный доход монет в час
-        let populationIncomePerHour = 10; // Начальный доход населения в час
+        let coinIncomePerMinute = 50; // Доход монет в минуту
+        let populationIncomePerMinute = 10; // Доход населения в минуту
+        let coinAutoCollectPerHour = 100; // Автоматический сбор монет в час
+        let populationAutoCollectPerHour = 20; // Автоматический сбор населения в час
+        let coinAutoCollectTimer; // Таймер для автоматического сбора монет
+        let populationAutoCollectTimer; // Таймер для автоматического сбора населения
+        let coinAutoCollectDuration = 2 * 60 * 60 * 1000; // Длительность автосбора монет (2 часа)
+        let populationAutoCollectDuration = 2 * 60 * 60 * 1000; // Длительность автосбора населения (2 часа)
 
-        // Загрузка данных из users.json
+        // Функция для автоматического сбора монет и населения
+        function startAutoCollect() {
+            coinAutoCollectTimer = setInterval(function() {
+                user.balance += coinAutoCollectPerHour / 60; // Добавляем монеты в соответствии с доходом в минуту
+                document.getElementById('balance').textContent = user.balance;
+            }, 60000); // Каждую минуту
+
+            populationAutoCollectTimer = setInterval(function() {
+                user.population += populationAutoCollectPerHour / 60; // Добавляем население в соответствии с доходом в минуту
+                document.getElementById('population').textContent = user.population;
+            }, 60000); // Каждую минуту
+
+            // Остановка автосбора через 2 часа
+            setTimeout(stopAutoCollect, coinAutoCollectDuration);
+            setTimeout(stopPopulationAutoCollect, populationAutoCollectDuration);
+        }
+
+        // Функция для остановки автоматического сбора монет
+        function stopAutoCollect() {
+            clearInterval(coinAutoCollectTimer);
+        }
+
+        // Функция для остановки автоматического сбора населения
+        function stopPopulationAutoCollect() {
+            clearInterval(populationAutoCollectTimer);
+        }
+
+        // Функция для обновления позиции игрока в топе
+        function updateUserRank() {
+            getAllUsersData().then(allUsers => {
+                allUsers.sort((a, b) => b.population - a.population); // Сортировка пользователей по населению
+
+                const currentUserIndex = allUsers.findIndex(u => u.username === user.username);
+                const userRank = currentUserIndex !== -1 ? currentUserIndex + 1 : 'Не в топе';
+
+                document.getElementById('userRank').textContent = userRank;
+            });
+        }
+
+        // Функция для загрузки данных о всех пользователях
         async function loadUsersFromFile() {
             try {
                 const response = await fetch('users.json');
@@ -76,160 +119,19 @@
             }
         }
 
-        function toggleUserDetails() {
-            const userDetails = document.getElementById('userDetails');
-            userDetails.style.display = userDetails.style.display === 'none' ? 'block' : 'none';
-
-            // Отображение дохода в меню под ником
-            if (userDetails.style.display === 'block') {
-                updateIncome(); // Обновляем доход при открытии
-                updateUserRank(); // Обновляем позицию в топе при открытии
-
-                // Отображение имени пользователя
-                document.getElementById('userName').textContent = user.username;
-            }
-        }
-
-        function saveUserDataToLocal() {
-            const userData = {
-                balance: user.balance,
-                population: user.population,
-                level: level,
-                levelUpCost: levelUpCost,
-                coinIncomePerHour: coinIncomePerHour,
-                populationIncomePerHour: populationIncomePerHour
-            };
-            localStorage.setItem('userData', JSON.stringify(userData));
-            saveAllUsersData();
-        }
-
-        function autoSaveUserData() {
-            saveUserDataToLocal();
-            setTimeout(autoSaveUserData, 30000); // Автосохранение каждые 30 секунд
-        }
-
-        function loadUserData() {
-            const userDataString = localStorage.getItem('userData');
-            if (userDataString) {
-                const userData = JSON.parse(userDataString);
-                user.balance = userData.balance;
-                user.population = userData.population;
-                level = userData.level;
-                levelUpCost = userData.levelUpCost;
-                coinIncomePerHour = userData.coinIncomePerHour;
-                populationIncomePerHour = userData.populationIncomePerHour;
-            }
-            document.getElementById('balance').textContent = user.balance;
-            document.getElementById('population').textContent = user.population;
-            updateLevelUpButton();
-            updateLeagueAndGif(user.population);
-            updateUserRank();
-        }
-
-        function saveAllUsersData() {
-            loadUsersFromFile().then(allUsers => {
-                const currentUserIndex = allUsers.findIndex(u => u.username === user.username);
-
-                if (currentUserIndex !== -1) {
-                    // Обновить данные существующего пользователя
-                    allUsers[currentUserIndex] = { ...user, level, levelUpCost, coinIncomePerHour, populationIncomePerHour };
-                } else {
-                    // Добавить нового пользователя
-                    allUsers.push({ ...user, level, levelUpCost, coinIncomePerHour, populationIncomePerHour });
-                }
-
-                // Сохраняем обновленные данные обратно в файл
-                localStorage.setItem('allUsers', JSON.stringify(allUsers));
-            });
-        }
-
+        // Функция для получения данных о всех пользователях
         function getAllUsersData() {
             return loadUsersFromFile();
         }
 
-        function updateUserRank() {
-            getAllUsersData().then(allUsers => {
-                allUsers.sort((a, b) => b.population - a.population); // Сортировка пользователей по населению
-
-                const currentUserIndex = allUsers.findIndex(u => u.username === user.username);
-                const userRank = currentUserIndex !== -1 ? currentUserIndex + 1 : 'Не в топе';
-
-                document.getElementById('userRank').textContent = userRank;
-            });
-        }
-
-        function updateLeagueAndGif(population) {
-            const leagueElement = document.getElementById('league');
-            const gifElement = document.getElementById('leagueGif');
-            const leagueContainer = document.getElementById('leagueContainer');
-
-            if (population < 10000) {
-                leagueElement.innerHTML = '<i class="fas fa-user"></i>Начинающий';
-                gifElement.src = 'https://i.pinimg.com/originals/ff/1d/88/ff1d8824966668a2eb271133549d5d79.gif';
-                leagueContainer.style.backgroundColor = '#823316';
-            } else if (population < 50000) {
-                leagueElement.innerHTML = '<i class="fas fa-user-graduate"></i>Опытный';
-                gifElement.src = 'https://cdnb.artstation.com/p/assets/images/images/052/004/767/original/yurii-ray-06-gif-export-200.gif?1658731969';
-                leagueContainer.style.backgroundColor = '#940A36';
-            } else {
-                leagueElement.innerHTML = '<i class="fas fa-crown"></i>Правитель';
-                gifElement.src = 'https://i.pinimg.com/originals/80/31/12/803112952a7108f000906544d545256e.gif';
-                leagueContainer.style.backgroundColor = '#721373';
-            }
-        }
-
-        function updateLevelUpButton() {
-            const levelUpButton = document.getElementById('levelUpButton');
-            levelUpButton.textContent = `Уровень: ${level} (Цена: ${levelUpCost})`;
-
-            if (user.balance >= levelUpCost) {
-                levelUpButton.classList.remove('disabled');
-                levelUpButton.classList.add('enabled');
-            } else {
-                levelUpButton.classList.remove('enabled');
-                levelUpButton.classList.add('disabled');
-            }
-        }
-
-        function levelUp() {
-            if (user.balance >= levelUpCost) {
-                user.balance -= levelUpCost;
-                level += 1;
-                levelUpCost = Math.floor(levelUpCost * 1.65); // +65%
-                coinIncomePerHour += Math.ceil(coinIncomePerHour * 0.5); // Доход монет в час увеличивается на 50%
-                populationIncomePerHour += Math.ceil(populationIncomePerHour * 0.5); // Доход населения в час увеличивается на 50%
-
-                saveUserDataToLocal();
-
-                document.getElementById('balance').textContent = user.balance;
-                document.getElementById('coinIncome').textContent = coinIncomePerHour;
-                document.getElementById('populationIncome').textContent = populationIncomePerHour;
-                updateLevelUpButton();
-                updateLeagueAndGif(user.population); // Обновляем лигу на основе населения
-            }
-        }
-
-        function updateUserIncome() {
-            user.balance += coinIncomePerSecond;
-            user.population += populationIncomePerSecond;
-            document.getElementById('balance').textContent = user.balance;
-            document.getElementById('population').textContent = user.population;
-            saveUserDataToLocal();
-        }
-
-        function updateIncome() {
-            const coinIncomeElement = document.getElementById('coinIncome');
-            const populationIncomeElement = document.getElementById('populationIncome');
-            coinIncomeElement.textContent = coinIncomePerHour;
-            populationIncomeElement.textContent = populationIncomePerHour;
-        }
-
         window.onload = function() {
+            startAutoCollect(); // Начать автосбор при загрузке страницы
             loadUserData();
             autoSaveUserData();
         };
 
-        setInterval(updateUserIncome, 1000); // каждую секунду
+        setInterval(updateUserIncome, 60000); // каждую минуту
     </script>
 </body>
 </html>
+
