@@ -129,7 +129,7 @@
 
     <div class="container">
         <div class="player-info">
-            <img src="player.jpg" alt="Player Photo">
+            <img src="https://img.freepik.com/premium-vector/black-person-profile-icon-round-3d-ui-button-vector-illustration_541075-900.jpg?w=360" alt="Player Photo">
             <div class="nickname">PlayerNick</div>
         </div>
 
@@ -147,22 +147,23 @@
         </button>
     </div>
 
-    <script>
+     <script>
+        // Загрузка данных игрока из localStorage
+        const playerData = JSON.parse(localStorage.getItem('playerData'));
 
+        if (playerData) {
+            const playerPhoto = document.querySelector('.player-info img');
+            const playerName = document.querySelector('.nickname');
+            const balanceElement = document.getElementById('balance');
+            const leagueElement = document.getElementById('league');
 
-         // Загрузка данных игрока из файла player.json
-        fetch('player.json')
-            .then(response => response.json())
-            .then(playerData => {
-                // Установка фото и имени игрока
-                const playerPhoto = document.querySelector('.player-info img');
-                const playerName = document.querySelector('.nickname');
-                playerPhoto.src = playerData.photo;
-                playerName.textContent = playerData.name;
-            })
-            .catch(error => console.error('Ошибка загрузки данных игрока:', error));
-
-
+            // Устанавливаем фото, имя, баланс и лигу игрока
+            playerPhoto.src = playerData.photo;
+            playerName.textContent = playerData.name; // Используем имя игрока из JSON-файла
+            balanceElement.textContent = playerData.balance;
+            leagueElement.textContent = playerData.league;
+            leagueElement.className = `league ${playerData.league.toLowerCase()}`;
+        }
 
         const farmTime = 1 * 10 * 1000; // 10 seconds for demonstration
         let isFarming = false;
@@ -211,7 +212,13 @@
             const balanceElement = document.getElementById('balance');
             const newBalance = parseInt(balanceElement.textContent) + 50;
             balanceElement.textContent = newBalance;
-            updateLeague(newBalance);
+
+            // Получаем текущее значение лиги
+            const leagueElement = document.getElementById('league');
+            const currentLeague = leagueElement.textContent;
+
+            // Обновляем лигу и сохраняем данные игрока
+            updateLeague(newBalance, currentLeague);
 
             const farmButton = document.getElementById('farmButton');
             farmButton.innerHTML = '<i class="fas fa-tractor" style="margin-right: 8px;"></i>Farm';
@@ -237,6 +244,39 @@
                 leagueElement.textContent = 'Ruler';
                 leagueElement.className = 'league ruler';
             }
+
+            // Обновляем данные игрока и сохраняем их в localStorage
+            updatePlayerData(balance, leagueElement.textContent);
+        }
+
+        // Сохранение данных игрока в localStorage
+        function savePlayerData() {
+            const playerName = document.querySelector('.nickname').textContent;
+            const playerPhoto = document.querySelector('.player-info img').src;
+            const balance = document.getElementById('balance').textContent;
+            const league = document.getElementById('league').textContent;
+
+            const playerData = {
+                name: playerName,
+                photo: playerPhoto,
+                balance: parseInt(balance),
+                league: league
+            };
+
+            localStorage.setItem('playerData', JSON.stringify(playerData));
+        }
+
+        // Обновление данных игрока
+        function updatePlayerData(newBalance, newLeague) {
+            const balanceElement = document.getElementById('balance');
+            const leagueElement = document.getElementById('league');
+
+            balanceElement.textContent = newBalance;
+            leagueElement.textContent = newLeague;
+            leagueElement.className = `league ${newLeague.toLowerCase()}`;
+
+            // Сохраняем обновленные данные игрока в localStorage
+            savePlayerData();
         }
     </script>
 
