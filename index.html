@@ -104,8 +104,8 @@
             border-radius: 8px;
         }
         .gif-container {
-            width: 400px;
-            height: 200px;
+            width: 350px;
+            height: 250px;
             position: relative;
             margin-bottom: 30px;
             border: 5px solid #fff;
@@ -148,6 +148,22 @@
     </div>
 
     <script>
+
+
+         // Загрузка данных игрока из файла player.json
+        fetch('player.json')
+            .then(response => response.json())
+            .then(playerData => {
+                // Установка фото и имени игрока
+                const playerPhoto = document.querySelector('.player-info img');
+                const playerName = document.querySelector('.nickname');
+                playerPhoto.src = playerData.photo;
+                playerName.textContent = playerData.name;
+            })
+            .catch(error => console.error('Ошибка загрузки данных игрока:', error));
+
+
+
         const farmTime = 1 * 10 * 1000; // 10 seconds for demonstration
         let isFarming = false;
         let farmEndTime;
