@@ -148,22 +148,26 @@
     </div>
 
      <script>
-        // Загрузка данных игрока из localStorage
-        const playerData = JSON.parse(localStorage.getItem('playerData'));
+        // Функция для загрузки данных игрока из localStorage
+        function loadPlayerData() {
+            const playerData = JSON.parse(localStorage.getItem('playerData'));
+            if (playerData) {
+                const playerPhoto = document.querySelector('.player-info img');
+                const playerName = document.querySelector('.nickname');
+                const balanceElement = document.getElementById('balance');
+                const leagueElement = document.getElementById('league');
 
-        if (playerData) {
-            const playerPhoto = document.querySelector('.player-info img');
-            const playerName = document.querySelector('.nickname');
-            const balanceElement = document.getElementById('balance');
-            const leagueElement = document.getElementById('league');
-
-            // Устанавливаем фото, имя, баланс и лигу игрока
-            playerPhoto.src = playerData.photo;
-            playerName.textContent = playerData.name; // Используем имя игрока из JSON-файла
-            balanceElement.textContent = playerData.balance;
-            leagueElement.textContent = playerData.league;
-            leagueElement.className = `league ${playerData.league.toLowerCase()}`;
+                // Устанавливаем фото, имя, баланс и лигу игрока
+                playerPhoto.src = playerData.photo;
+                playerName.textContent = playerData.name; // Используем имя игрока из JSON-файла
+                balanceElement.textContent = playerData.balance;
+                leagueElement.textContent = playerData.league;
+                leagueElement.className = `league ${playerData.league.toLowerCase()}`;
+            }
         }
+
+        // Вызываем функцию загрузки данных игрока при загрузке страницы
+        window.onload = loadPlayerData;
 
         const farmTime = 1 * 10 * 1000; // 10 seconds for demonstration
         let isFarming = false;
