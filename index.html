@@ -3,135 +3,226 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Districts</title>
+    <title>Farm Game</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Amatic+SC:wght@400;700&family=Comfortaa:wght@300..700&family=Yatra+One&display=swap" rel="stylesheet">
     <style>
-        body { background-color: black; color: white; font-family: "Comfortaa", sans-serif; text-align: center; margin: 0; padding: 0; }
-        .header { padding: 10px; background-color: #000; box-shadow: 0 0 10px rgba(0, 0, 0, 0.5); display: flex; justify-content: space-between; align-items: center; }
-        .user-info { display: flex; align-items: center; cursor: pointer; }
-        .user-info img { width: 50px; height: 50px; border-radius: 50%; margin-right: 10px; }
-        .balance { font-size: 22px; margin: 15px 0; }
-        .population { font-size: 18px; margin: 10px 0; }
-        .control-panel { width: 100%; display: flex; justify-content: center; background-color: #000; padding: 20px 0; box-sizing: border-box; box-shadow: 0 0 20px rgba(0, 0, 0, 0.5); }
-        .control-panel button { background-color: rgba(68, 68, 68, 0.7); color: white; border: none; padding: 10px 20px; margin: 10px; cursor: pointer; border-radius: 10px; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; box-shadow: 0 0 10px rgba(255, 255, 255, 0.5); transition: box-shadow 0.3s, background-color 0.3s; }
-        .control-panel button img { width: 20px; height: 20px; margin-right: 10px; opacity: 0.7; }
-        .control-panel button:hover img { opacity: 1; }
-        .gif-container { margin: 50px 0; }
-        .gif-container img { max-width: 80%; border: 5px solid white; border-radius: 10px; box-shadow: 0 0 20px rgba(255, 255, 255, 0.5); }
-        .league-container { margin: 20px 0; padding: 10px; background-color: #333; box-shadow: 0 0 20px rgba(0, 0, 0, 0.5); border-radius: 10px; display: inline-block; transition: background-color 0.3s; }
-        .league { font-size: 15px; padding: 3px; background-color: rgba(68, 68, 68, 0.7); border-radius: 5px; box-shadow: 0 0 10px rgba(255, 255, 255, 0.3); display: flex; align-items: center; }
-        .league i { margin-right: 5px; }
-        .user-details { display: none; position: absolute; top: 60px; left: 10px; background-color: #222; padding: 10px; border-radius: 5px; box-shadow: 0 0 10px rgba(255, 255, 255, 0.8); }
-        .level-up-button { margin: 20px; padding: 10px 20px; font-size: 20px; font-family: "Comfortaa", sans-serif; border: none; border-radius: 10px; cursor: pointer; transition: background-color 0.3s; }
-        .level-up-button.disabled { background-color: grey; cursor: not-allowed; }
-        .level-up-button.enabled { background-color: #DC143C; }
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 0;
+            padding: 0;
+            background-color: #000;
+            color: #fff;
+        }
+        .container {
+            margin-top: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            max-width: 600px;
+        }
+        .player-info {
+            text-align: center;
+            margin-top: 40px;
+            margin-bottom: 30px;
+        }
+        .player-info img {
+            border-radius: 50%;
+            width: 150px;
+            height: 150px;
+            margin-bottom: 10px;
+        }
+        .nickname {
+            font-size: 24px;
+            margin-top: 10px;
+        }
+        .balance {
+            margin-bottom: 20px;
+            font-size: 18px;
+        }
+        .league {
+            padding: 10px 20px;
+            font-size: 16px;
+            border: 3px solid;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            background: #000
+            box-shadow: 5px 5px 10px #bebebe, -5px -5px 10px #ffffff;
+        }
+        .beginner {
+            border-color: green;
+
+        }
+        .experienced {
+            border-color: blue;
+
+        }
+        .veteran {
+            border-color: purple;
+
+        }
+        .pro {
+            border-color: orange;
+
+        }
+        .ruler {
+            border-color: red;
+
+        }
+        .farm-button {
+            padding: 15px 40px;
+            font-size: 16px;
+            position: relative;
+            overflow: hidden;
+            background-color: #333;
+            border: none;
+            color: #fff;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.3s;
+            margin-bottom: 50px;
+        }
+        .farm-button:hover {
+            background-color: #555;
+        }
+        .farm-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            width: var(--progress-width, 0%);
+            background-color: var(--progress-color, green);
+            z-index: -1;
+            transition: width linear 3s, background-color linear 3s;
+            border-radius: 8px;
+        }
+        .gif-container {
+            width: 400px;
+            height: 200px;
+            position: relative;
+            margin-bottom: 30px;
+            border: 5px solid #fff;
+            animation: flicker 1s infinite;
+            border-radius: 10px;
+        }
+        .gif-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 10px;
+        }
+        @keyframes flicker {
+            0% { box-shadow: 0 0 10px 2px rgba(255, 255, 255, 0.1); }
+            50% { box-shadow: 0 0 20px 4px rgba(255, 255, 255, 0.5); }
+            100% { box-shadow: 0 0 10px 2px rgba(255, 255, 255, 0.4); }
+        }
     </style>
 </head>
 <body>
-    <div class="header">
-        <div class="user-info" onclick="toggleUserDetails()">
-            <img id="userPhoto" src="https://i.pinimg.com/736x/28/51/5a/28515a8c368b635df3f067335d86f6e3.jpg" alt="User Photo">
-            <span id="userName">User Name</span>
+
+    <div class="container">
+        <div class="player-info">
+            <img src="player.jpg" alt="Player Photo">
+            <div class="nickname">PlayerNick</div>
         </div>
-        <div class="balance">Balance: <span id="balance">0</span></div>
-    </div>
-    <div class="user-details" id="userDetails">
-        <p>Доход монет в минуту: <span id="coinIncome">0</span></p>
-        <p>Доход населения в минуту: <span id="populationIncome">0</span></p>
-        <p>Позиция в топе: <span id="userRank">Загрузка...</span></p>
+
+        <div class="gif-container">
+            <img src="https://i.pinimg.com/originals/f8/15/eb/f815eb14aed1bfaa9a1b3104346e35c9.gif" alt="Your GIF">
+        </div>
+
+        <div class="balance"><i class="fas fa-users" style="margin-right: 8px;"></i>Balance: <span id="balance">0</span> Population</div>
+
+        <div class="league beginner" id="league">Beginner</div>
+
+        <button class="farm-button" id="farmButton" onclick="startFarm()">
+            <i class="fas fa-tractor" style="margin-right: 8px;"></i>
+            <span>Farm</span>
+        </button>
     </div>
 
-    <div class="population">Population: <span id="population">0</span></div>
-    <div class="league-container" id="leagueContainer">
-        <div id="league" class="league">Начинающий</div>
-    </div>
-    <div class="gif-container">
-        <img id="leagueGif" src="https://i.pinimg.com/originals/ff/1d/88/ff1d8824966668a2eb271133549d5d79.gif" alt="Gif Image">
-    </div>
-    <button id="levelUpButton" class="level-up-button disabled" onclick="levelUp()">Уровень: 1 (Цена: 500)</button>
     <script>
-        let user = { balance: 0, population: 0, username: "User Name" };
-        let level = 1;
-        let levelUpCost = 500;
-        let coinIncomePerMinute = 50; // Доход монет в минуту
-        let populationIncomePerMinute = 10; // Доход населения в минуту
-        let coinAutoCollectPerHour = 100; // Автоматический сбор монет в час
-        let populationAutoCollectPerHour = 20; // Автоматический сбор населения в час
-        let coinAutoCollectTimer; // Таймер для автоматического сбора монет
-        let populationAutoCollectTimer; // Таймер для автоматического сбора населения
-        let coinAutoCollectDuration = 2 * 60 * 60 * 1000; // Длительность автосбора монет (2 часа)
-        let populationAutoCollectDuration = 2 * 60 * 60 * 1000; // Длительность автосбора населения (2 часа)
+        const farmTime = 1 * 10 * 1000; // 10 seconds for demonstration
+        let isFarming = false;
+        let farmEndTime;
 
-        // Функция для автоматического сбора монет и населения
-        function startAutoCollect() {
-            coinAutoCollectTimer = setInterval(function() {
-                user.balance += coinAutoCollectPerHour / 60; // Добавляем монеты в соответствии с доходом в минуту
-                document.getElementById('balance').textContent = user.balance;
-            }, 60000); // Каждую минуту
+        function startFarm() {
+            if (isFarming) return;
 
-            populationAutoCollectTimer = setInterval(function() {
-                user.population += populationAutoCollectPerHour / 60; // Добавляем население в соответствии с доходом в минуту
-                document.getElementById('population').textContent = user.population;
-            }, 60000); // Каждую минуту
+            isFarming = true;
+            farmEndTime = Date.now() + farmTime;
+            const farmButton = document.getElementById('farmButton');
+            farmButton.disabled = true;
+            updateButton();
 
-            // Остановка автосбора через 2 часа
-            setTimeout(stopAutoCollect, coinAutoCollectDuration);
-            setTimeout(stopPopulationAutoCollect, populationAutoCollectDuration);
-        }
-
-        // Функция для остановки автоматического сбора монет
-        function stopAutoCollect() {
-            clearInterval(coinAutoCollectTimer);
-        }
-
-        // Функция для остановки автоматического сбора населения
-        function stopPopulationAutoCollect() {
-            clearInterval(populationAutoCollectTimer);
-        }
-
-        // Функция для обновления позиции игрока в топе
-        function updateUserRank() {
-            getAllUsersData().then(allUsers => {
-                allUsers.sort((a, b) => b.population - a.population); // Сортировка пользователей по населению
-
-                const currentUserIndex = allUsers.findIndex(u => u.username === user.username);
-                const userRank = currentUserIndex !== -1 ? currentUserIndex + 1 : 'Не в топе';
-
-                document.getElementById('userRank').textContent = userRank;
-            });
-        }
-
-        // Функция для загрузки данных о всех пользователях
-        async function loadUsersFromFile() {
-            try {
-                const response = await fetch('users.json');
-                if (!response.ok) {
-                    throw new Error('Network response was not ok ' + response.statusText);
+            const interval = setInterval(() => {
+                const timeLeft = farmEndTime - Date.now();
+                if (timeLeft <= 0) {
+                    clearInterval(interval);
+                    isFarming = false;
+                    farmButton.disabled = false;
+                    farmButton.innerHTML = '<i class="fas fa-coins" style="margin-right: 8px;"></i>Claim';
+                    farmButton.onclick = claimPopulation;
+                    farmButton.style.setProperty('--progress-width', '100%');
+                    farmButton.style.setProperty('--progress-color', 'green');
+                } else {
+                    updateButton(timeLeft);
+                    const progress = ((farmTime - timeLeft) / farmTime) * 100;
+                    farmButton.style.setProperty('--progress-width', `${progress}%`);
+                    farmButton.style.setProperty('--progress-color', 'green');
                 }
-                const data = await response.json();
-                return data;
-            } catch (error) {
-                console.error('Error fetching users:', error);
-                return [];
+            }, 1000);
+        }
+
+        function updateButton(timeLeft) {
+            if (timeLeft) {
+                const hours = Math.floor(timeLeft / (1000 * 60 * 60));
+                const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
+                document.getElementById('farmButton').innerHTML = `<i class="fas fa-hourglass-start" style="margin-right: 8px;"></i>${hours}h ${minutes}m ${seconds}s`;
+            } else {
+                document.getElementById('farmButton').innerHTML = '<i class="fas fa-tractor" style="margin-right: 8px;"></i>Farming...';
             }
         }
 
-        // Функция для получения данных о всех пользователях
-        function getAllUsersData() {
-            return loadUsersFromFile();
+        function claimPopulation() {
+            const balanceElement = document.getElementById('balance');
+            const newBalance = parseInt(balanceElement.textContent) + 50;
+            balanceElement.textContent = newBalance;
+            updateLeague(newBalance);
+
+            const farmButton = document.getElementById('farmButton');
+            farmButton.innerHTML = '<i class="fas fa-tractor" style="margin-right: 8px;"></i>Farm';
+            farmButton.onclick = startFarm;
+            farmButton.style.setProperty('--progress-width', '0');
         }
 
-        window.onload = function() {
-            startAutoCollect(); // Начать автосбор при загрузке страницы
-            loadUserData();
-            autoSaveUserData();
-        };
-
-        setInterval(updateUserIncome, 60000); // каждую минуту
+        function updateLeague(balance) {
+            const leagueElement = document.getElementById('league');
+            if (balance < 100) {
+                leagueElement.textContent = 'Beginner';
+                leagueElement.className = 'league beginner';
+            } else if (balance < 200) {
+                leagueElement.textContent = 'Experienced';
+                leagueElement.className = 'league experienced';
+            } else if (balance < 300) {
+                leagueElement.textContent = 'Veteran';
+                leagueElement.className = 'league veteran';
+            } else if (balance < 400) {
+                leagueElement.textContent = 'Pro';
+                leagueElement.className = 'league pro';
+            } else {
+                leagueElement.textContent = 'Ruler';
+                leagueElement.className = 'league ruler';
+            }
+        }
     </script>
+
 </body>
 </html>
-
