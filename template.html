@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Telegram Web App Game</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #000;
+        }
+        .toolbar, .bottom-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #000;
+            color: #fff;
+            padding: 10px 15px;
+        }
+        .toolbar {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+        }
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            z-index: 1000;
+            justify-content: space-around;
+        }
+        .nav-button {
+            color: #fff;
+            text-decoration: none;
+            font-size: 16px;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .nav-button i {
+            margin-bottom: 5px;
+            font-size: 24px;
+        }
+        .nav-button:hover {
+            background-color: #333;
+            border-radius: 5px;
+        }
+        .nav-button.active i, .nav-button.active span {
+            text-shadow: 0 0 10px #fff;
+        }
+        .content {
+            padding-top: 50px;
+            padding-bottom: 100px; /* Adjusted to make room for Invite button */
+            text-align: center;
+            color: #fff;
+            width: 80%;
+            margin: auto;
+        }
+        .player-name, .player-league {
+            display: flex;
+            align-items: center;
+            margin-right: 35px;
+            margin-left: 15px;
+        }
+        .player-league i {
+            margin-right: 5px;
+        }
+        .referral-container {
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .referral-earnings {
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+        .claim-button {
+            background-color: #05a60d;
+            border: none;
+            padding: 10px 20px;
+            color: #fff;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .invite-button {
+            background-color: #fff;
+            border: none;
+            padding: 10px 20px;
+            color: #000;
+            font-size: 18px;
+            border-radius: 5px;
+            cursor: pointer;
+            position: fixed;
+            bottom: 70px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1001;
+            width: 80%;
+            font-weight: bold;
+            margin-bottom:40px;
+        }
+        .referral-list {
+            list-style: none;
+            padding: 0;
+            margin: 20px 0 0;
+            width: 100%;
+            max-width: 400px;
+        }
+        .referral-list li {
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 10px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .referral-list li i {
+            margin-right: 10px;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1002;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.8);
+        }
+        .modal-content {
+            background-color: #333;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 400px;
+            border-radius: 10px;
+            color: #fff;
+            text-align: center;
+        }
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+        .close:hover,
+        .close:focus {
+            color: #fff;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        .copy-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background-color: #555;
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+        .copy-container span {
+            flex: 1;
+            word-wrap: break-word;
+        }
+        .copy-icon {
+            cursor: pointer;
+            margin-left: 10px;
+        }
+        @media (max-width: 600px) {
+            .nav-button {
+                font-size: 14px;
+                padding: 8px;
+            }
+            .toolbar, .bottom-nav {
+                padding: 8px 10px;
+            }
+            .referral-list {
+                max-width: 80%;
+                margin-left: 10%;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Верхняя панель -->
+    <div class="toolbar">
+        <div class="player-name">{username}</div>
+        <div class="player-league">
+            <i class="fas fa-crown"></i> <!-- Измените иконку для различных лиг -->
+            League 1
+        </div>
+    </div>
+
+    <!-- Основное содержимое -->
+    <div class="content">
+        <h1>Referral Earnings</h1>
+        <div class="referral-container">
+            <div class="referral-earnings">You have earned: {coins} coins</div>
+            <button class="claim-button" onclick="claimReferral()">Claim</button>
+        </div>
+        <h2>Your Referrals</h2>
+        <ul class="referral-list">
+            {referral_list_items}
+        </ul>
+    </div>
+
+    <!-- Кнопка Invite -->
+    <button class="invite-button" onclick="openModal()">Invite</button>
+
+    <!-- Нижняя навигация -->
+    <div class="bottom-nav">
+        <a href="index.html" class="nav-button" id="home-button">
+            <i class="fas fa-home"></i>
+            <span>Home</span>
+        </a>
+        <a href="task.html" class="nav-button" id="task-button">
+            <i class="fas fa-tasks"></i>
+            <span>Task</span>
+        </a>
+        <a href="ref.html" class="nav-button active" id="ref-button">
+            <i class="fas fa-users"></i>
+            <span>Ref</span>
+        </a>
+    </div>
+
+    <!-- Модальное окно -->
+    <div id="inviteModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <h2>Invite Friends</h2>
+            <p>Share this link with your friends:</p>
+            <div class="copy-container">
+                <span id="referralLink">https://yourgame.com/referral/{telegram_id}</span>
+                <i class="fas fa-copy copy-icon" onclick="copyReferralLink()"></i>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Определяем активную страницу
+        const currentLocation = window.location.pathname.split("/").pop();
+        const navButtons = document.querySelectorAll('.nav-button');
+
+        navButtons.forEach(button => {
+            if(button.getAttribute('href') === currentLocation) {
+                button.classList.add('active');
+            } else {
+                button.classList.remove('active');
+            }
+        });
+
+        // Функция для запроса на клейм дохода от рефералов
+        function claimReferral() {
+            alert("Referral earnings claimed!");
+        }
+
+        // Функция для открытия модального окна
+        function openModal() {
+            document.getElementById("inviteModal").style.display = "block";
+        }
+
+        // Функция для закрытия модального окна
+        function closeModal() {
+            document.getElementById("inviteModal").style.display = "none";
+        }
+
+        // Функция для копирования реферальной ссылки
+        function copyReferralLink() {
+            const referralLink = document.getElementById("referralLink").innerText;
+            const textarea = document.createElement("textarea");
+            textarea.value = referralLink;
+            document.body.appendChild(textarea);
+            textarea.select();
+            document.execCommand("copy");
+            document.body.removeChild(textarea);
+            alert("Referral link copied to clipboard!");
+        }
+
+        // Закрытие модального окна при нажатии вне его области
+        window.onclick = function(event) {
+            const modal = document.getElementById("inviteModal");
+            if (event.target == modal) {
+                modal.style.display = "none";
+            }
+        }
+    </script>
+
+</body>
+</html>

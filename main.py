@@ -1,93 +1,108 @@
-import asyncio
-import json
+import sqlite3
+import telebot
+from telebot import types
+import os
 
-from aiogram import types
-from aiogram import Bot, Dispatcher
-from aiogram.fsm.context import FSMContext
-from aiohttp import web
-from aiogram.filters.command import Command
-from aiogram.types import ReplyKeyboardMarkup, KeyboardButton, WebAppInfo,InlineKeyboardMarkup, InlineKeyboardButton
+TOKEN = '7492402331:AAFv8J8fShA8kz-ZauRHVcQDb8KFr8s51wY'  # Замените на ваш реальный токен
+WEB_APP_URL = 'https://derzkiu1.github.io/-/'  # Замените на URL вашего веб-приложения
 
-bot = Bot(token='7028494517:AAEiIPjbRdn7EY-IupFwIF9pEBegJaUogDI')
-dp = Dispatcher()
+bot = telebot.TeleBot(TOKEN)
 
-USERS_FILE = 'users.json'
+def init_db():
+    conn = sqlite3.connect('database.db')
+    c = conn.cursor()
+    c.execute('''
+        CREATE TABLE IF NOT EXISTS users (
+            telegram_id INTEGER PRIMARY KEY,
+            username TEXT,
+            coins INTEGER DEFAULT 0
+        )
+    ''')
+    c.execute('''
+        CREATE TABLE IF NOT EXISTS referrals (
+            user_id INTEGER,
+            referral_telegram_id INTEGER,
+            referral_username TEXT,
+            coins_earned INTEGER,
+            FOREIGN KEY(user_id) REFERENCES users(telegram_id)
+        )
+    ''')
+    conn.commit()
+    conn.close()
 
-def load_users():
-    try:
-        with open(USERS_FILE, 'r', encoding='utf-8') as file:
-            return json.load(file)
-    except (FileNotFoundError, json.JSONDecodeError):
-        return []
+def add_user(telegram_id, username):
+    conn = sqlite3.connect('database.db')
+    c = conn.cursor()
+    c.execute('INSERT OR IGNORE INTO users (telegram_id, username) VALUES (?, ?)', (telegram_id, username))
+    conn.commit()
+    conn.close()
 
-def save_users(users):
-    with open(USERS_FILE, 'w', encoding='utf-8') as file:
-        json.dump(users, file, ensure_ascii=False, indent=4)
+def add_referral(user_id, referral_telegram_id, referral_username, coins_earned):
+    conn = sqlite3.connect('database.db')
+    c = conn.cursor()
+    c.execute('''
+        INSERT INTO referrals (user_id, referral_telegram_id, referral_username, coins_earned)
+        VALUES (?, ?, ?, ?)
+    ''', (user_id, referral_telegram_id, referral_username, coins_earned))
+    conn.commit()
+    conn.close()
 
-async def save_user_info(user_id: int, username: str, first_name: str, league: str, balance: int, population: int):
-    users = load_users()
-    user_info = {
-        "user_id": user_id,
-        "username": username,
-        "first_name": first_name,
-        "league": league,
-        "balance": balance,
-        "population": population,
-        "totalProfit": 0,
-        "items": [
-            {
-                "name": "Помощь бедным",
-                "price": 100,
-                "priceIncrement": 25,
-                "profit": 25,
-                "profitIncrement": 2.5,
-                "population": 10,
-                "populationIncrement": 1,
-                "level": 0
-            }
-        ]
-    }
+def get_user_data(telegram_id):
+    conn = sqlite3.connect('database.db')
+    c = conn.cursor()
+    c.execute('SELECT * FROM users WHERE telegram_id = ?', (telegram_id,))
+    user_data = c.fetchone()
+    conn.close()
+    return user_data
 
-    existing_user = next((user for user in users if user['user_id'] == user_id), None)
-    if existing_user:
-        # Обновляем информацию о существующем пользователе, сохраняя уровни товаров
-        existing_user.update({
-            "username": username,
-            "first_name": first_name,
-            "league": league,
-            "balance": balance,
-            "population": population
-        })
-    else:
-        # Новый пользователь получает начальные значения
-        user_info['balance'] = 500
-        user_info['population'] = 150
-        users.append(user_info)
+def get_referrals_data(user_id):
+    conn = sqlite3.connect('database.db')
+    c = conn.cursor()
+    c.execute('SELECT * FROM referrals WHERE user_id = ?', (user_id,))
+    referrals_data = c.fetchall()
+    conn.close()
+    return referrals_data
 
-    save_users(users)
+def generate_html(telegram_id):
+    user_data = get_user_data(telegram_id)
+    referrals_data = get_referrals_data(telegram_id)
 
-@dp.message(Command('start'))
-async def start(message: types.Message):
-    user_id = message.from_user.id
-    username = message.from_user.username or "Unknown"
-    first_name = message.from_user.first_name or "Unknown"
-    league = "Начинающий"
-    balance = 0
-    population = 0
+    if user_data and referrals_data:
+        username, coins = user_data[1], user_data[2]
+        referral_list_items = ''.join(
+            f'<li><i class="fas fa-user-plus"></i><span>{referral[2]}</span><span>{referral[3]} coins</span></li>'
+            for referral in referrals_data
+        )
 
-    await save_user_info(user_id, username, first_name, league, balance, population)
+        with open('template.html', 'r') as template_file:
+            template_content = template_file.read()
+            html_content = template_content.format(
+                username=username,
+                coins=coins,
+                referral_list_items=referral_list_items,
+                telegram_id=telegram_id
+            )
 
-    # Создаем инлайн-кнопку с WebAppInfo
-    web_app_button = InlineKeyboardButton(
-        text="Open",
-        web_app=WebAppInfo(url='https://derzkiu1.github.io/-/')
-    )
-    keyboard = InlineKeyboardMarkup(inline_keyboard=[[web_app_button]])
+        with open(f'{telegram_id}.html', 'w') as file:
+            file.write(html_content)
 
-    await bot.send_message(message.from_user.id, 'Welcome', reply_markup=keyboard)
+@bot.message_handler(commands=['start'])
+def send_welcome(message):
+    telegram_id = message.from_user.id
+    username = message.from_user.username
+    add_user(telegram_id, username)
+    generate_html(telegram_id)
 
-async def main():
-    await dp.start_polling(bot)
+    # Создаем кнопку Web App
+    web_app_button = types.WebAppInfo(WEB_APP_URL)
+    markup = types.ReplyKeyboardMarkup(row_width=1)
+    web_app_markup = types.KeyboardButton(text="Open Web App", web_app=web_app_button)
+    markup.add(web_app_markup)
 
-if __name__ == "__main__":
-    asyncio.run(main())
+    bot.send_message(message.chat.id, f"Welcome {username}! Click the button below to open the web app.", reply_markup=markup)
+
+if __name__ == '__main__':
+    print("Initializing database...")
+    init_db()
+    print("Starting bot...")
+    bot.polling()

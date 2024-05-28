@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Telegram Web App Game</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #000;
+        }
+        .toolbar, .bottom-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #000;
+            color: #fff;
+            padding: 10px 15px;
+        }
+        .toolbar {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+        }
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            z-index: 1000;
+            justify-content: space-around;
+        }
+        .nav-button {
+            color: #fff;
+            text-decoration: none;
+            font-size: 16px;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .nav-button i {
+            margin-bottom: 5px;
+            font-size: 24px;
+        }
+        .nav-button:hover {
+            background-color: #333;
+            border-radius: 5px;
+        }
+        .nav-button.active i, .nav-button.active span {
+            text-shadow: 0 0 10px #fff;
+        }
+        .content {
+            padding-top: 50px;
+            padding-bottom: 60px;
+            text-align: center;
+
+        }
+        .player-name, .player-league {
+            display: flex;
+            align-items: center;
+            margin-right: 35px;
+            margin-left: 15px;
+        }
+        .player-league i {
+            margin-right: 5px;
+        }
+        .task {
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+            margin-top: 15px;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 80%;
+            margin-left: 30px;
+        }
+        .task span {
+            margin-right: 10px;
+        }
+        .task i {
+            font-size: 20px;
+        }
+        @media (max-width: 600px) {
+            .nav-button {
+                font-size: 14px;
+                padding: 8px;
+            }
+            .toolbar, .bottom-nav {
+                padding: 8px 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Верхняя панель -->
+    <div class="toolbar">
+        <div class="player-name">Player Name</div>
+        <div class="player-league">
+            <i class="fas fa-crown"></i> <!-- Измените иконку для различных лиг -->
+            League 1
+        </div>
+    </div>
+
+    <!-- Основное содержимое -->
+    <div class="content">
+
+        <!-- Задания -->
+        <div class="task">
+            <span>Reach League 2</span>
+            <i class="far fa-check-circle" style="color: grey;"></i>
+            <span>Reward: 100 coins</span>
+        </div>
+        <div class="task">
+            <span>Reach League 3</span>
+            <i class="far fa-check-circle" style="color: grey;"></i>
+            <span>Reward: 150 coins</span>
+        </div>
+        <div class="task">
+            <span>Reach League 4</span>
+            <i class="far fa-check-circle" style="color: grey;"></i>
+            <span>Reward: 200 coins</span>
+        </div>
+        <div class="task">
+            <span>Reach League 5</span>
+            <i class="far fa-check-circle" style="color: grey;"></i>
+            <span>Reward: 250 coins</span>
+        </div>
+        <div class="task">
+            <span>Invite one friend</span>
+            <i class="far fa-check-circle" style="color: orange;"></i>
+            <span>Reward: 50 coins</span>
+        </div>
+        <div class="task">
+            <span>Invite 3 friends</span>
+            <i class="far fa-check-circle" style="color: grey;"></i>
+            <span>Reward: 150 coins</span>
+        </div>
+        <div class="task">
+            <span>Invite 5 friends</span>
+            <i class="far fa-check-circle" style="color: grey;"></i>
+            <span>Reward: 200 coins</span>
+        </div>
+        <div class="task">
+            <span>Subscribe to Telegram channel</span>
+            <i class="far fa-check-circle" style="color: grey;"></i>
+            <span>Reward: 50 coins</span>
+        </div>
+    </div>
+        <!-- Нижняя навигация -->
+    <div class="bottom-nav">
+        <a href="index.html" class="nav-button active" id="home-button">
+            <i class="fas fa-home"></i>
+            <span>Home</span>
+        </a>
+        <a href="task.html" class="nav-button" id="task-button">
+            <i class="fas fa-tasks"></i>
+            <span>Task</span>
+        </a>
+        <a href="ref.html" class="nav-button" id="ref-button">
+            <i class="fas fa-users"></i>
+            <span>Ref</span>
+        </a>
+    </div>
+
+    <script>
+        // Определяем активную страницу
+        const currentLocation = window.location.pathname.split("/").pop();
+        const navButtons = document.querySelectorAll('.nav-button');
+
+        navButtons.forEach(button => {
+            if(button.getAttribute('href') === currentLocation) {
+                button.classList.add('active');
+            } else {
+                button.classList.remove('active');
+            }
+        });
+    </script>
+</body>
+</html>
+

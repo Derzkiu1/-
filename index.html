@@ -3,175 +3,157 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Farm Game</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <title>Telegram Web App Game</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
         body {
-            font-family: Arial, sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
             margin: 0;
-            padding: 0;
+            font-family: Arial, sans-serif;
+            background-color: #000;
+        }
+        .toolbar, .bottom-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             background-color: #000;
             color: #fff;
+            padding: 10px 15px;
         }
-        .container {
-            margin-top: 20px;
+        .toolbar {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+        }
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            z-index: 1000;
+            justify-content: space-around;
+        }
+        .nav-button {
+            color: #fff;
+            text-decoration: none;
+            font-size: 16px;
+            padding: 10px;
             display: flex;
             flex-direction: column;
             align-items: center;
-            width: 100%;
-            max-width: 600px;
         }
-        .player-info {
-            text-align: center;
-            margin-top: 40px;
-            margin-bottom: 30px;
-        }
-        .player-info img {
-            border-radius: 50%;
-            width: 150px;
-            height: 150px;
-            margin-bottom: 10px;
-        }
-        .nickname {
+        .nav-button i {
+            margin-bottom: 5px;
             font-size: 24px;
-            margin-top: 10px;
         }
-        .balance {
-            margin-bottom: 20px;
-            font-size: 18px;
-        }
-        .league {
-            padding: 10px 20px;
-            font-size: 16px;
-            border: 3px solid;
-            border-radius: 10px;
-            margin-bottom: 30px;
-            background: #000
-            box-shadow: 5px 5px 10px #bebebe, -5px -5px 10px #ffffff;
-        }
-        .beginner {
-            border-color: green;
-
-        }
-        .experienced {
-            border-color: blue;
-
-        }
-        .veteran {
-            border-color: purple;
-
-        }
-        .pro {
-            border-color: orange;
-
-        }
-        .ruler {
-            border-color: red;
-
-        }
-        .farm-button {
-            padding: 15px 40px;
-            font-size: 16px;
-            position: relative;
-            overflow: hidden;
+        .nav-button:hover {
             background-color: #333;
-            border: none;
-            color: #fff;
-            border-radius: 8px;
-            cursor: pointer;
+            border-radius: 5px;
+        }
+        .nav-button.active i, .nav-button.active span {
+            text-shadow: 0 0 10px #fff;
+        }
+        .content {
+            padding-top: 50px;
+            padding-bottom: 60px;
+            text-align: center;
+        }
+        .player-name, .player-league {
             display: flex;
             align-items: center;
-            justify-content: center;
-            transition: background-color 0.3s;
-            margin-bottom: 50px;
+            margin-right: 35px;
+            margin-left: 15px;
         }
-        .farm-button:hover {
+        .player-league i {
+            margin-right: 5px;
+        }
+        .balance-container {
+            background-color: rgba(0, 0, 1, 0.5); /* полупрозрачный фон */
+            border-radius: 10px; /* скругление углов */
+            padding: 20px;
+            margin-bottom: 20px;
+            color:white;
+        }
+        #farmButton, #claimButton {
             background-color: #555;
-        }
-        .farm-button::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            height: 100%;
-            width: var(--progress-width, 0%);
-            background-color: var(--progress-color, green);
-            z-index: -1;
-            transition: width linear 3s, background-color linear 3s;
-            border-radius: 8px;
-        }
-        .gif-container {
-            width: 350px;
-            height: 250px;
-            position: relative;
-            margin-bottom: 30px;
-            border: 5px solid #fff;
-            animation: flicker 1s infinite;
+            border: none;
+            color: white;
+            padding: 15px 32px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 4px 2px;
+            cursor: pointer;
             border-radius: 10px;
         }
-        .gif-container img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            border-radius: 10px;
+        #farmButton.disabled {
+            cursor: not-allowed;
+            background-color: #888;
         }
-        @keyframes flicker {
-            0% { box-shadow: 0 0 10px 2px rgba(255, 255, 255, 0.1); }
-            50% { box-shadow: 0 0 20px 4px rgba(255, 255, 255, 0.5); }
-            100% { box-shadow: 0 0 10px 2px rgba(255, 255, 255, 0.4); }
+        #farmButton i, #claimButton i {
+            margin-right: 8px;
+        }
+        #timer {
+            color: #fff;
+            font-size: 18px;
+        }
+        @media (max-width: 600px) {
+            .nav-button {
+                font-size: 14px;
+                padding: 8px;
+            }
+            .toolbar, .bottom-nav {
+                padding: 8px 10px;
+            }
         }
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <div class="player-info">
-            <img src="https://img.freepik.com/premium-vector/black-person-profile-icon-round-3d-ui-button-vector-illustration_541075-900.jpg?w=360" alt="Player Photo">
-            <div class="nickname">PlayerNick</div>
+    <!-- Верхняя панель -->
+    <div class="toolbar">
+        <div class="player-name">Player Name</div>
+        <div class="player-league">
+            <i class="fas fa-crown"></i> <!-- Измените иконку для различных лиг -->
+            League 1
         </div>
-
-        <div class="gif-container">
-            <img src="https://i.pinimg.com/originals/f8/15/eb/f815eb14aed1bfaa9a1b3104346e35c9.gif" alt="Your GIF">
-        </div>
-
-        <div class="balance"><i class="fas fa-users" style="margin-right: 8px;"></i>Balance: <span id="balance">0</span> Population</div>
-
-        <div class="league beginner" id="league">Beginner</div>
-
-        <button class="farm-button" id="farmButton" onclick="startFarm()">
-            <i class="fas fa-tractor" style="margin-right: 8px;"></i>
-            <span>Farm</span>
-        </button>
     </div>
 
-     <script>
-        // Функция для загрузки данных игрока из localStorage
-        function loadPlayerData() {
-            const playerData = JSON.parse(localStorage.getItem('playerData'));
-            if (playerData) {
-                const playerPhoto = document.querySelector('.player-info img');
-                const playerName = document.querySelector('.nickname');
-                const balanceElement = document.getElementById('balance');
-                const leagueElement = document.getElementById('league');
+    <!-- Основное содержимое -->
+    <div class="content">
+        <div class="balance-container">
+            <h2>Balance</h2>
+            <p id="balance">0 coins</p>
+        </div>
+        <button id="farmButton" onclick="startFarm()"><i class="fas fa-tractor"></i>Farm</button>
+        <button id="claimButton" onclick="claimPopulation()" style="display: none;"><i class="fas fa-coins"></i>Claim</button>
+        <div id="timer" style="display: none;"></div>
+    </div>
 
-                // Устанавливаем фото, имя, баланс и лигу игрока
-                playerPhoto.src = playerData.photo;
-                playerName.textContent = playerData.name; // Используем имя игрока из JSON-файла
-                balanceElement.textContent = playerData.balance;
-                leagueElement.textContent = playerData.league;
-                leagueElement.className = `league ${playerData.league.toLowerCase()}`;
-            }
-        }
+    <!-- Нижняя навигация -->
+    <div class="bottom-nav">
+        <a href="index.html" class="nav-button active" id="home-button">
+            <i class="fas fa-home"></i>
+            <span>Home</span>
+        </a>
+        <a href="task.html" class="nav-button" id="task-button">
+            <i class="fas fa-tasks"></i>
+            <span>Task</span>
+        </a>
+        <a href="ref.html" class="nav-button" id="ref-button">
+            <i class="fas fa-users"></i>
+            <span>Ref</span>
+        </a>
+    </div>
 
-        // Вызываем функцию загрузки данных игрока при загрузке страницы
-        window.onload = loadPlayerData;
+    <script>
+        let balance = 0;
+        document.getElementById('balance').textContent = `${balance} coins`;
 
         const farmTime = 1 * 10 * 1000; // 10 seconds for demonstration
         let isFarming = false;
-        let farmEndTime;
+        let isClaiming = false; // Добавляем переменную для отслеживания процесса сбора монет
+                let farmEndTime;
 
         function startFarm() {
             if (isFarming) return;
@@ -190,25 +172,21 @@
                     farmButton.disabled = false;
                     farmButton.innerHTML = '<i class="fas fa-coins" style="margin-right: 8px;"></i>Claim';
                     farmButton.onclick = claimPopulation;
-                    farmButton.style.setProperty('--progress-width', '100%');
-                    farmButton.style.setProperty('--progress-color', 'green');
                 } else {
                     updateButton(timeLeft);
-                    const progress = ((farmTime - timeLeft) / farmTime) * 100;
-                    farmButton.style.setProperty('--progress-width', `${progress}%`);
-                    farmButton.style.setProperty('--progress-color', 'green');
                 }
             }, 1000);
         }
 
         function updateButton(timeLeft) {
+            const farmButton = document.getElementById('farmButton');
             if (timeLeft) {
                 const hours = Math.floor(timeLeft / (1000 * 60 * 60));
                 const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
                 const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
-                document.getElementById('farmButton').innerHTML = `<i class="fas fa-hourglass-start" style="margin-right: 8px;"></i>${hours}h ${minutes}m ${seconds}s`;
+                farmButton.innerHTML = `<i class="fas fa-hourglass-start" style="margin-right: 8px;"></i>${hours}h ${minutes}m ${seconds}s`;
             } else {
-                document.getElementById('farmButton').innerHTML = '<i class="fas fa-tractor" style="margin-right: 8px;"></i>Farming...';
+                farmButton.innerHTML = '<i class="fas fa-tractor" style="margin-right: 8px;"></i>Farming...';
             }
         }
 
@@ -217,70 +195,9 @@
             const newBalance = parseInt(balanceElement.textContent) + 50;
             balanceElement.textContent = newBalance;
 
-            // Получаем текущее значение лиги
-            const leagueElement = document.getElementById('league');
-            const currentLeague = leagueElement.textContent;
-
-            // Обновляем лигу и сохраняем данные игрока
-            updateLeague(newBalance, currentLeague);
-
             const farmButton = document.getElementById('farmButton');
             farmButton.innerHTML = '<i class="fas fa-tractor" style="margin-right: 8px;"></i>Farm';
             farmButton.onclick = startFarm;
-            farmButton.style.setProperty('--progress-width', '0');
-        }
-
-        function updateLeague(balance) {
-            const leagueElement = document.getElementById('league');
-            if (balance < 100) {
-                leagueElement.textContent = 'Beginner';
-                leagueElement.className = 'league beginner';
-            } else if (balance < 200) {
-                leagueElement.textContent = 'Experienced';
-                leagueElement.className = 'league experienced';
-            } else if (balance < 300) {
-                leagueElement.textContent = 'Veteran';
-                leagueElement.className = 'league veteran';
-            } else if (balance < 400) {
-                leagueElement.textContent = 'Pro';
-                leagueElement.className = 'league pro';
-            } else {
-                leagueElement.textContent = 'Ruler';
-                leagueElement.className = 'league ruler';
-            }
-
-            // Обновляем данные игрока и сохраняем их в localStorage
-            updatePlayerData(balance, leagueElement.textContent);
-        }
-
-        // Сохранение данных игрока в localStorage
-        function savePlayerData() {
-            const playerName = document.querySelector('.nickname').textContent;
-            const playerPhoto = document.querySelector('.player-info img').src;
-            const balance = document.getElementById('balance').textContent;
-            const league = document.getElementById('league').textContent;
-
-            const playerData = {
-                name: playerName,
-                photo: playerPhoto,
-                balance: parseInt(balance),
-                league: league
-            };
-
-            localStorage.setItem('playerData', JSON.stringify(playerData));
-        }
-
-        // Обновление данных игрока
-        function updatePlayerData(newBalance, newLeague) {
-            const balanceElement = document.getElementById('balance');
-            const leagueElement = document.getElementById('league');
-
-            balanceElement.textContent = newBalance;
-            leagueElement.textContent = newLeague;
-            leagueElement.className = `league ${newLeague.toLowerCase()}`;
-
-            // Сохраняем обновленные данные игрока в localStorage
-            savePlayerData();
         }
     </script>
 
