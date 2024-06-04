@@ -3,203 +3,288 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Telegram Web App Game</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <title>Игра в Телеграм</title>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Russo+One&display=swap');
+
         body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #121212;
+            color: #e0e0e0;
             margin: 0;
-            font-family: Arial, sans-serif;
-            background-color: #000;
+            padding: 0;
         }
-        .toolbar, .bottom-nav {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background-color: #000;
-            color: #fff;
-            padding: 10px 15px;
+        header {
+            background-color: #1e1e1e;
+            color: #e0e0e0;
+            padding: 1px;
+            text-align: center;
         }
-        .toolbar {
-            position: fixed;
-            top: 0;
-            width: 100%;
-            z-index: 1000;
+        .fade-in-out {
+            display: inline-block;
+            animation: fadeInOut 5s infinite;
         }
-        .bottom-nav {
-            position: fixed;
-            bottom: 0;
-            width: 100%;
-            z-index: 1000;
-            justify-content: space-around;
+        @keyframes fadeInOut {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
         }
-        .nav-button {
-            color: #fff;
-            text-decoration: none;
-            font-size: 16px;
+        nav {
+            background-color: #333;
             padding: 10px;
+            text-align: center;
+        }
+        nav a {
+            margin: 0 10px;
+            text-decoration: none;
+            color: #e0e0e0;
+            font-family: 'Russo One', sans-serif;
+        }
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 0 20px;
+        }
+        .player-info {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .player-info img {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            border: 2px solid #e0e0e0;
+        }
+        .achievements {
+            background-color: #1e1e1e;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+            text-align: center;
+        }
+        .achievements h3 {
+            font-family: 'Russo One', sans-serif;
+            color: #ff9800;
+            margin-bottom: 20px;
+        }
+        .achievement-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 20px;
+            justify-items: center;
+        }
+        .achievement {
+            background-color: #333;
+            padding: 20px;
+            border-radius: 8px;
+            width: 45%;
+            height: 45%;
             display: flex;
             flex-direction: column;
             align-items: center;
-        }
-        .nav-button i {
-            margin-bottom: 5px;
-            font-size: 24px;
-        }
-        .nav-button:hover {
-            background-color: #333;
-            border-radius: 5px;
-        }
-        .nav-button.active i, .nav-button.active span {
-            text-shadow: 0 0 10px #fff;
-        }
-        .content {
-            padding-top: 50px;
-            padding-bottom: 60px;
+            justify-content: center;
+            color: #e0e0e0;
+            font-family: 'Russo One', sans-serif;
             text-align: center;
-        }
-        .player-name, .player-league {
-            display: flex;
-            align-items: center;
-            margin-right: 35px;
-            margin-left: 15px;
-        }
-        .player-league i {
-            margin-right: 5px;
-        }
-        .balance-container {
-            background-color: rgba(0, 0, 1, 0.5); /* полупрозрачный фон */
-            border-radius: 10px; /* скругление углов */
-            padding: 20px;
-            margin-bottom: 20px;
-            color:white;
-        }
-        #farmButton, #claimButton {
-            background-color: #555;
-            border: none;
-            color: white;
-            padding: 15px 32px;
-            text-align: center;
-            text-decoration: none;
-            display: inline-block;
-            font-size: 16px;
-            margin: 4px 2px;
             cursor: pointer;
-            border-radius: 10px;
+            transition: transform 0.3s ease;
         }
-        #farmButton.disabled {
-            cursor: not-allowed;
-            background-color: #888;
+        .achievement:hover {
+            transform: translateY(-5px);
         }
-        #farmButton i, #claimButton i {
-            margin-right: 8px;
+        .achievement.locked {
+            background-color: #555;
+            color: #777;
         }
-        #timer {
-            color: #fff;
-            font-size: 18px;
+        .achievement img {
+            width: 50px;
+            height: 50px;
+            margin-bottom: 10px;
         }
-        @media (max-width: 600px) {
-            .nav-button {
-                font-size: 14px;
-                padding: 8px;
-            }
-            .toolbar, .bottom-nav {
-                padding: 8px 10px;
-            }
+
+        /* Модальное окно */
+        .modal {
+            display: none; /* Скрыто по умолчанию */
+            position: fixed;
+            z-index: 1; /* Поместите его поверх всего остального */
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto; /* Включить прокрутку, если это необходимо */
+            background-color: rgba(0,0,0,0.4); /* Черный с прозрачностью */
+        }
+
+        /* Контейнер модального окна */
+        .modal-content {
+            background-color: #c76b08;
+            margin: 15% auto; /* 15% от верхней и нижней стороны экрана */
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%; /* Ширина контейнера */
+            border-radius: 8px;
+            box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2), 0 6px 20px 0 rgba(0,0,0,0.19);
+            position: relative;
+        }
+
+        /* Закрыть кнопку */
+        .close {
+            color: #aaa;
+            position: absolute;
+            top: 0;
+            right: 0;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
         }
     </style>
 </head>
 <body>
-
-    <!-- Верхняя панель -->
-    <div class="toolbar">
-        <div class="player-name">Player Name</div>
-        <div class="player-league">
-            <i class="fas fa-crown"></i> <!-- Измените иконку для различных лиг -->
-            League 1
+    <header id="header">
+        <h1 id="headerText"></h1>
+    </header>
+    <nav>
+        <a href="index.hml">Home</a>
+        <a href="top.html">Top</a>
+        <a href="shop.html">Shop</a>
+    </nav>
+    <div class="container">
+        <div class="player-info">
+            <img src="https://via.placeholder.com/100" alt="Avatar">
+            <h2>Игрок: <span id="playerName">Имя игрока</span></h2>
+            <p>Баланс: <span id="balance">0 DLC</span></p>
         </div>
-    </div>
-
-    <!-- Основное содержимое -->
-    <div class="content">
-        <div class="balance-container">
-            <h2>Balance</h2>
-            <p id="balance">0 coins</p>
+        <div class="achievements">
+            <h3>Ачивки</h3>
+            <div class="achievement-grid" id="achievementGrid">
+                <!-- Ачивки будут добавлены здесь -->
+            </div>
+            <div id="myModal" class="modal">
+                <div class="modal-content">
+                    <span class="close">&times;</span>
+                    <p>Поздравляем! Вы получили новую ачивку: <span id="achievementName"></span></p>
+                    <p>Вам начислено бонусных монет: <span id="bonusCoins">0 DLC</span></p>
+                </div>
+            </div>
         </div>
-        <button id="farmButton" onclick="startFarm()"><i class="fas fa-tractor"></i>Farm</button>
-        <button id="claimButton" onclick="claimPopulation()" style="display: none;"><i class="fas fa-coins"></i>Claim</button>
-        <div id="timer" style="display: none;"></div>
-    </div>
-
-    <!-- Нижняя навигация -->
-    <div class="bottom-nav">
-        <a href="index.html" class="nav-button active" id="home-button">
-            <i class="fas fa-home"></i>
-            <span>Home</span>
-        </a>
-        <a href="task.html" class="nav-button" id="task-button">
-            <i class="fas fa-tasks"></i>
-            <span>Task</span>
-        </a>
-        <a href="ref.html" class="nav-button" id="ref-button">
-            <i class="fas fa-users"></i>
-            <span>Ref</span>
-        </a>
     </div>
 
     <script>
-        let balance = 0;
-        document.getElementById('balance').textContent = `${balance} coins`;
+        // Проверяем, зашел ли игрок в игру первый раз
+        let isFirstTime = true;
 
-        const farmTime = 1 * 10 * 1000; // 10 seconds for demonstration
-        let isFarming = false;
-        let isClaiming = false; // Добавляем переменную для отслеживания процесса сбора монет
-                let farmEndTime;
-
-        function startFarm() {
-            if (isFarming) return;
-
-            isFarming = true;
-            farmEndTime = Date.now() + farmTime;
-            const farmButton = document.getElementById('farmButton');
-            farmButton.disabled = true;
-            updateButton();
-
-            const interval = setInterval(() => {
-                const timeLeft = farmEndTime - Date.now();
-                if (timeLeft <= 0) {
-                    clearInterval(interval);
-                    isFarming = false;
-                    farmButton.disabled = false;
-                    farmButton.innerHTML = '<i class="fas fa-coins" style="margin-right: 8px;"></i>Claim';
-                    farmButton.onclick = claimPopulation;
-                } else {
-                    updateButton(timeLeft);
-                }
-            }, 1000);
+        // Обновление информации об игроке
+        function updatePlayerInfo(playerData) {
+            document.getElementById('playerName').innerText = playerData.name;
+            document.getElementById('balance').innerText = playerData.balance + ' DLC';
+            // Здесь вы можете добавить код для обновления фото игрока
         }
 
-        function updateButton(timeLeft) {
-            const farmButton = document.getElementById('farmButton');
-            if (timeLeft) {
-                const hours = Math.floor(timeLeft / (1000 * 60 * 60));
-                const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
-                const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
-                farmButton.innerHTML = `<i class="fas fa-hourglass-start" style="margin-right: 8px;"></i>${hours}h ${minutes}m ${seconds}s`;
-            } else {
-                farmButton.innerHTML = '<i class="fas fa-tractor" style="margin-right: 8px;"></i>Farming...';
+        // Функция для отображения модального окна
+        function showModal(achievementName, bonusCoins) {
+            const modal = document.getElementById('myModal');
+            const span = document.getElementsByClassName('close')[0];
+            const achievementNameSpan = document.getElementById('achievementName');
+            const bonusCoinsSpan = document.getElementById('bonusCoins');
+
+            // При клике на кнопку "Закрыть", модальное окно закрывается
+            span.onclick = function() {
+                modal.style.display = "none";
+            }
+
+            // При клике вне модального окна, оно также закрывается
+            window.onclick = function(event) {
+                if (event.target == modal) {
+                    modal.style.display = "none";
+                }
+            }
+
+            // Отображаем сообщение об ачивке и бонусе монет в модальном окне
+            achievementNameSpan.textContent = achievementName;
+            bonusCoinsSpan.textContent = bonusCoins + ' DLC';
+
+            // Открываем модальное окно
+            modal.style.display = "block";
+        }
+
+        // Обновление баланса и проверка на получение новой ачивки
+        function updateBalanceAndCheckAchievement(newBalance) {
+            const balanceElement = document.getElementById('balance');
+            const currentBalance = parseInt(balanceElement.innerText);
+            balanceElement.innerText = newBalance + ' DLC';
+
+            // Проверяем, если игрок впервые достиг баланса 5000
+            if (newBalance >= 5000 && currentBalance < 5000 && isFirstTime) {
+                // Показываем модальное окно
+                showModal("Достижение: Баланс 5000", 100); // 100 - это примерный бонус монет
+                isFirstTime = false; // Помечаем, что игрок больше не в первый раз в игре
             }
         }
 
-        function claimPopulation() {
-            const balanceElement = document.getElementById('balance');
-            const newBalance = parseInt(balanceElement.textContent) + 50;
-            balanceElement.textContent = newBalance;
+        // Примерный код для обновления баланса
+        // Ваш код может выглядеть иначе, например, в зависимости от того,
+        // каким образом вы получаете данные о балансе игрока
+        const initialBalance = 45000; // Баланс в DLC, установленный для примера
+        updateBalanceAndCheckAchievement(initialBalance);
 
-            const farmButton = document.getElementById('farmButton');
-            farmButton.innerHTML = '<i class="fas fa-tractor" style="margin-right: 8px;"></i>Farm';
-            farmButton.onclick = startFarm;
+        // Добавляем анимацию для заголовка
+        const headerText = "Dillercoin";
+        const headerElement = document.getElementById('headerText');
+
+        function addLetterAnimation(letter, delay) {
+            const span = document.createElement('span');
+            span.textContent = letter;
+            span.className = 'fade-in-out';
+            span.style.animationDelay = `${delay}s`;
+            headerElement.appendChild(span);
         }
-    </script>
 
+        headerText.split('').forEach((letter, index) => {
+            addLetterAnimation(letter, index * 0.5);
+        });
+
+        // Ачивки
+        const achievements = [
+            { name: 'Ачивка 1', achieved: true, icon: 'https://cdn-icons-png.flaticon.com/512/4319/4319092.png' },
+            { name: 'Баланс 5000', achieved: initialBalance >= 5000, icon: 'https://tr.rbxcdn.com/e151abd53a8c514c40e0cc2b17d4139b/420/420/Image/Png' },
+            { name: 'Баланс 10000', achieved: initialBalance >= 10000, icon: 'https://tr.rbxcdn.com/e38dc81bb233400fa9d38bd19a833ff1/420/420/Image/Png' },
+
+        ];
+
+        const achievementGrid = document.getElementById('achievementGrid');
+
+        achievements.forEach((achievement, index) => {
+            const div = document.createElement('div');
+            div.className = 'achievement';
+            if (!achievement.achieved) {
+                div.classList.add('locked');
+            }
+            const img = document.createElement('img');
+            img.src = achievement.icon;
+            div.appendChild(img);
+            const text = document.createElement('span');
+            text.textContent = achievement.name;
+            div.appendChild(text);
+            achievementGrid.appendChild(div);
+
+            // Добавляем обработчик клика для отображения модального окна при клике на незаблокированные ачивки
+            if (achievement.achieved) {
+                div.addEventListener('click', () => {
+                    // Получаем информацию об ачивке и бонусных монетах
+                    const achievementName = achievement.name;
+                    const bonusCoins = 100; // Замените этот код фактическим получением бонусных монет
+
+                    // Показываем модальное окно с информацией об ачивке
+                    showModal(achievementName, bonusCoins);
+                });
+            }
+        });
+    </script>
 </body>
 </html>
+
