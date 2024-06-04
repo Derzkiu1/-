@@ -3,121 +3,222 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Shop</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <title>Игра в Телеграм</title>
     <style>
-        body { background-color: black; color: white; font-family: Arial, sans-serif; text-align: center; margin: 0; padding: 0; }
-        .header { padding: 10px; background-color: #000; box-shadow: 0 0 10px rgba(0, 0, 0, 0.5); }
-        .back-button { position: absolute; top: 10px; left: 10px; background-color: rgba(68, 68, 68, 0.7); color: white; border: none; padding: 10px; cursor: pointer; border-radius: 10px; display: flex; align-items: center; justify-content: center; transition: background-color 0.3s; }
-        .back-button:hover { background-color: rgba(68, 68, 68, 0.9); }
-        .back-button i { margin-right: 5px; }
-        .item { margin: 20px auto; padding: 10px; background-color: #333; border-radius: 10px; box-shadow: 0 0 10px rgba(255, 255, 255, 0.3); max-width: 400px; text-align: left; }
-        .item img { width: 100px; height: 100px; border-radius: 10px; margin-right: 20px; }
-        .item h2 { font-size: 20px; margin-bottom: 5px; }
-        .item p { margin: 5px 0; }
-        .item button { background-color: rgba(255, 0, 0, 0.7); color: white; border: none; padding: 10px 20px; margin-top: 10px; cursor: pointer; border-radius: 10px; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; box-shadow: 0 0 10px rgba(255, 255, 255, 0.5); transition: box-shadow 0.3s, background-color 0.3s; }
-        .item button:disabled { background-color: grey; cursor: not-allowed; }
-        .item button:hover { background-color: rgba(255, 0, 0, 0.9); box-shadow: 0 0 20px rgba(220, 20, 60, 0.8); }
-        .item button img { width: 20px; height: 20px; margin-right: 5px; opacity: 0.7; }
-        .item button:hover img { opacity: 1; }
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Russo+One&display=swap');
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #121212;
+            color: #e0e0e0;
+            margin: 0;
+            padding: 0;
+        }
+        header {
+            background-color: #1e1e1e;
+            color: #e0e0e0;
+            padding: 1px;
+            text-align: center;
+        }
+        .fade-in-out {
+            display: inline-block;
+            animation: fadeInOut 5s infinite;
+        }
+        @keyframes fadeInOut {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+        nav {
+            background-color: #333;
+            padding: 10px;
+            text-align: center;
+        }
+        nav a {
+            margin: 0 10px;
+            text-decoration: none;
+            color: #e0e0e0;
+            font-family: 'Russo One', sans-serif;
+        }
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 0 20px;
+        }
+        .player-info {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .player-info img {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            border: 2px solid #e0e0e0;
+        }
+        .shop {
+            background-color: #1e1e1e;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+        .shop h3 {
+            font-family: 'Russo One', sans-serif;
+            color: #ff9800;
+        }
+        .shop-items {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
+        }
+        .shop-item {
+            background-color: #333;
+            padding: 20px;
+            border-radius: 8px;
+            flex: 1 1 calc(50% - 20px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: #e0e0e0;
+            position: relative;
+            box-sizing: border-box;
+        }
+        .shop-item img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+        }
+        .shop-item h4 {
+            font-family: 'Russo One', sans-serif;
+            margin: 10px 0;
+        }
+        .shop-item p {
+            margin: 5px 0;
+        }
+        .shop-item button {
+            background-color: #ff9800;
+            border: none;
+            color: #121212;
+            padding: 10px 20px;
+            margin: 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-family: 'Roboto', sans-serif;
+        }
+        .shop-item button:hover {
+            background-color: #e68900;
+        }
+        .shop-item.disabled {
+            background-color: #555;
+            pointer-events: none;
+        }
+        .shop-item.disabled button {
+            background-color: #777;
+            color: #ccc;
+        }
+        .total-income {
+            background-color: #333;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+            text-align: center;
+            font-family: 'Russo One', sans-serif;
+            color: #ff9800;
+        }
     </style>
 </head>
 <body>
-    <div class="header">
-        <h1>Shop</h1>
-        <button class="back-button" onclick="window.location.href = 'index.html'"><i class="fas fa-arrow-left"></i></button>
+    <header id="header">
+        <h1 id="headerText"></h1>
+    </header>
+    <nav>
+        <a href="index.html">Home</a>
+        <a href="top.html">Top</a>
+        <a href="shop.html">Shop</a>
+    </nav>
+    <div class="container">
+        <div class="player-info">
+            <img src="https://via.placeholder.com/100" alt="Avatar">
+            <h2>Игрок: <span id="playerName">Имя игрока</span></h2>
+            <p>Баланс: <span id="balance">0 DLC</span></p>
+        </div>
+        <div class="shop">
+            <h3>Магазин</h3>
+            <div class="shop-items" id="shopItems">
+                <!-- Товары будут добавлены здесь -->
+            </div>
+            <div class="total-income" id="totalIncome">
+                Общая сумма доходов от бизнесов: 0 DLC/час
+            </div>
+        </div>
     </div>
-    <div class="item">
-        <img src="https://via.placeholder.com/100" alt="Item 1">
-        <h2>Помощь бедным</h2>
-        <p>Цена: 100</p>
-        <p>Доходность в минуту: 50 монет, 10 населения</p>
-        <button data-item="Помощь бедным" onclick="buyItem('Помощь бедным')">Купить</button>
-    </div>
-    <div class="item">
-        <img src="https://via.placeholder.com/100" alt="Item 2">
-        <h2>Уборка улиц</h2>
-        <p>Цена: 250</p>
-        <p>Доходность в минуту: 100 монет, 20 населения</p>
-        <button data-item="Уборка улиц" onclick="buyItem('Уборка улиц')">Купить</button>
-    </div>
-    <!-- Add more items here -->
     <script>
-        async function buyItem(itemName) {
-            try {
-                const response = await fetch('users.json');
-                const userData = await response.json();
-                const user = userData[0]; // Предполагаем, что есть только один пользователь
-                const item = user.items.find(i => i.name === itemName);
-                if (user.balance >= item.price) {
-                    user.balance -= item.price;
-                    item.price += item.priceIncrement;
-                    item.profit += item.profitIncrement;
-                    item.population += item.populationIncrement;
-                    item.level += 1;
-                    // Сохраняем обновленные данные пользователя и товаров
-                    await fetch('/save_data', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify(userData)
-                    });
-                    alert(`Вы успешно купили ${itemName}! Теперь вы будете получать прибыль.`);
-                    startHourlyTimer(); // Запускаем таймер после покупки товара
-                    startProfitTimer(item); // Запускаем таймер начисления прибыли
-                    updateButtonStyle(itemName); // Обновляем стиль кнопки после покупки товара
-                } else {
-                    alert('Недостаточно средств!');
-                }
-            } catch (error) {
-                console.error('Ошибка при покупке товара:', error);
-            }
+        // Замените "Имя игрока" и "https://via.placeholder.com/100" на соответствующие данные из Телеграм
+        document.getElementById('playerName').innerText = "Ваше имя";
+        // Ваш код для получения фото игрока из Телеграм
+        // Обновление баланса
+        // Например, для теста:
+        var balance = 100000; // Баланс в DLC
+        document.getElementById('balance').innerText = balance + ' DLC';
+
+        // Добавляем анимацию для заголовка
+        const headerText = "Dillercoin";
+        const headerElement = document.getElementById('headerText');
+
+        function addLetterAnimation(letter, delay) {
+            const span = document.createElement('span');
+            span.textContent = letter;
+            span.className = 'fade-in-out';
+            span.style.animationDelay = `${delay}s`;
+            headerElement.appendChild(span);
         }
 
-        // Функция для начисления прибыли от товаров каждую секунду
-        function startProfitTimer(item) {
-            setInterval(() => {
-                const userData = fetch('users.json').then(response => response.json());
-                userData.then(data => {
-                    const user = data[0];
-                    user.balance += item.profit;
-                    user.population += item.population;
-                    document.getElementById('user-balance').innerText = `Баланс: ${user.balance}`;
-                    document.getElementById('user-population').innerText = `Население: ${user.population}`;
-                    fetch('/save_data', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify(data)
-                    });
-                });
-            }, 1000); // 1000 milliseconds = 1 second
-        }
+        headerText.split('').forEach((letter, index) => {
+            addLetterAnimation(letter, index * 0.5);
+        });
 
-        // Функция для обновления стиля кнопки в зависимости от баланса игрока
-        async function updateButtonStyle(itemName) {
-            try {
-                const response = await fetch('users.json');
-                const userData = await response.json();
-                const user = userData[0]; // Предполагаем, что есть только один пользователь
-                const item = user.items.find(i => i.name === itemName);
-                const button = document.querySelector(`button[data-item="${itemName}"]`);
-                if (user.balance >= item.price) {
-                    button.style.backgroundColor = 'rgba(255, 0, 0, 0.7)';
-                    button.style.cursor = 'pointer';
-                    button.disabled = false;
-                } else {
-                    button.style.backgroundColor = 'grey';
-                    button.style.cursor = 'not-allowed';
-                    button.disabled = true;
+        // Товары в магазине
+        const shopItems = [
+            { name: 'Бизнес 1', price: 1000, income: 100, image: 'https://via.placeholder.com/150' },
+            { name: 'Бизнес 2', price: 2000, income: 200, image: 'https://via.placeholder.com/150' },
+            { name: 'Бизнес 3', price: 3000, income: 300, image: 'https://via.placeholder.com/150' },
+            { name: 'Бизнес 4', price: 4000, income: 400, image: 'https://via.placeholder.com/150' },
+            { name: 'Бизнес 5', price: 5000, income: 500, image: 'https://via.placeholder.com/150' }
+        ];
+
+        const shopItemsContainer = document.getElementById('shopItems');
+        let totalIncome = 0;
+
+        shopItems.forEach((item, index) => {
+            const div = document.createElement('div');
+            div.className = 'shop-item';
+            div.id = `item-${index}`;
+            div.innerHTML = `
+                <img src="${item.image}" alt="${item.name}">
+                <h4>${item.name}</h4>
+                <p>Цена: ${item.price} DLC</p>
+                <p>Доход: ${item.income} DLC/час</p>
+                <button onclick="buyItem(${index})">Купить</button>
+                <p id="item-count-${index}">Куплено: 0/5</p>
+            `;
+            shopItemsContainer.appendChild(div);
+        });
+
+        function buyItem(index) {
+            const item = shopItems[index];
+            const itemCountElement = document.getElementById(`item-count-${index}`);
+            const currentCount = parseInt(itemCountElement.innerText.split(': ')[1].split('/')[0]);
+
+            if (balance >= item.price && currentCount < 5) {
+                balance -= item.price;
+                totalIncome += item.income;
+                document.getElementById('balance').innerText = balance + ' DLC';
+                document.getElementById('totalIncome').innerText = `Общая сумма доходов от бизнесов: ${totalIncome} DLC/час`;
+                itemCountElement.innerText = `Куплено: ${currentCount + 1}/5`;
+                if (currentCount + 1 === 5) {
+                    document.getElementById(`item-${index}`).classList.add('disabled');
                 }
-            } catch (error) {
-                console.error('Ошибка при обновлении стиля кнопки:', error);
             }
         }
     </script>
 </body>
 </html>
-
