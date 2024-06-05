@@ -1,1 +1,20 @@
-
+[
+    {
+        "nickname": "Player1",
+        "cardNumber": "0132-1210-4010-0150"
+    },
+    {
+        "nickname": "Player2",
+        "cardNumber": "0200-2020-0020-0200"
+    },
+    {
+        "nickname": "sanyasem",
+        "card_number": "9942-7651-1509-9624",
+        "balance": 100
+    },
+    {
+        "nickname": "tilllltt",
+        "card_number": "0187-3103-2735-0566",
+        "balance": 100
+    }
+]
