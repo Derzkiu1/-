@@ -228,27 +228,25 @@
     }, 1000);
   }
 
- window.onload = function() {
-  fetch('users.json')
-    .then(response => response.json())
-    .then(data => {
-      // В data будет содержаться массив объектов с информацией о пользователях
-      // Здесь вы можете обновить никнейм и номер карты игрока
-      const player = data[0]; // Предположим, что первый элемент в массиве - это текущий игрок
-      const nicknameElement = document.querySelector('.container-name');
-      const cardNumberElement = document.getElementById('cardNumber');
-      nicknameElement.textContent = player.nickname;
-      cardNumberElement.textContent = player.cardNumber;
+  window.onload = function() {
+    fetch('users.json')
+      .then(response => response.json())
+      .then(data => {
+        // В data будет содержаться массив объектов с информацией о пользователях
+        // Здесь вы можете обновить никнейм и номер карты игрока
+        const player = data[0]; // Предположим, что первый элемент в массиве - это текущий игрок
+        const nicknameElement = document.querySelector('.container-name');
+        const cardNumberElement = document.getElementById('cardNumber');
+        nicknameElement.textContent = player.nickname;
+        cardNumberElement.textContent = player.cardNumber;
 
-      // После того, как данные о пользователе загружены и отображены, начните начисление монет
-      const eightHours = 60 * 60 * 8; // 8 часов в секундах
-      startTimer(eightHours, document.getElementById('timer'));
-      addCoins(eightHours); // Запуск начисления монет
-    })
-    .catch(error => console.error('Ошибка загрузки данных из файла users.json:', error));
-};
-
-
+        // После того, как данные о пользователе загружены и отображены, начните начисление монет
+        const eightHours = 60 * 60 * 8; // 8 часов в секундах
+        startTimer(eightHours, document.getElementById('timer'));
+        addCoins(eightHours); // Запуск начисления монет
+      })
+      .catch(error => console.error('Ошибка загрузки данных из файла users.json:', error));
+  };
 </script>
 
 </body>
